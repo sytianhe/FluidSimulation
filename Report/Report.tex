@@ -1,27 +1,60 @@
-\documentclass[11pt]{article}
-%
-\include{macros}
-\usepackage{graphicx}
-\usepackage{pxfonts}
-\usepackage{algorithm}
-\usepackage{algorithmic}
-\usepackage{epstopdf}
-\usepackage{fullpage}
-\usepackage{epic}
-\usepackage{eepic}
+%%% template.tex
+%%%
+%%% This LaTeX source document can be used as the basis for your technical
+%%% paper or abstract. Intentionally stripped of annotation, the parameters
+%%% and commands should be adjusted for your particular paper - title, 
+%%% author, article DOI, etc.
+%%% The accompanying ``template.annotated.tex'' provides copious annotation
+%%% for the commands and parameters found in the source document. (The code
+%%% is identical in ``template.tex'' and ``template.annotated.tex.'')
+
+\documentclass[annual]{acmsiggraph}
+
+\TOGonlineid{45678}
+\TOGvolume{0}
+\TOGnumber{0}
+\TOGarticleDOI{1111111.2222222}
+\TOGprojectURL{}
+\TOGvideoURL{}
+\TOGdataURL{}
+\TOGcodeURL{}
+
+\title{CS5643 Final Project Proposal \\ Fluid Simulation with Solids}
+
+\author{Michael Flashman\thanks{e-mail:mtf53@cornell.edu}\\Cornell University \and Tianhe Zhang \thanks{e-mail:tz249@cornell.edu}\\Cornell University}
+\pdfauthor{Robert A. Smith}
+
+\keywords{fluid, solids, rigid body}
 
 \begin{document}
 
-\title{CS5643 Final Project Proposal \\ Fluid Simulation}
-\author{Michael Flashman \\ mtf53@cornell.edu \and Tianhe Zhang \\ tz249@cornell.edu\\}
-\date{\today}
+%% \teaser{
+%%   \includegraphics[height=1.5in]{images/sampleteaser}
+%%   \caption{Spring Training 2009, Peoria, AZ.}
+%% }
+
 \maketitle
 
 \abstract{
-Wind dispersal of  seeds is an important mechanism for mobility in many plant species.  Unlike other dispersal mechanisms, wind dispersal is chiefly a function of seed morphology (and wind patterns).  Primarily isolated from the  complex ecology of the plant's environment during this critical stage of a life, physical simulation provides a way to  quantify the fitness of different seed morphologies.   As a first step toward this quantification, we will implement a basic framework for stable 2D fluid simulation with rigid body coupling. }
 
 
 \section{Overview}
+
+
+
+\begin{abstract}
+Wind dispersal of  seeds is an important mechanism for mobility in many plant species.  Unlike other dispersal mechanisms, wind dispersal is chiefly a function of seed morphology (and wind patterns).  Primarily isolated from the  complex ecology of the plant's environment during this critical stage of a life, physical simulation provides a way to  quantify the fitness of different seed morphologies.   As a first step toward this quantification, we will implement a basic framework for stable 2D fluid simulation with rigid body coupling. }
+
+
+
+\end{abstract}
+
+
+\keywordlist
+
+\copyrightspace
+
+\section{Introduction}
 %Wind dispersal of  seeds is an important mechanism for mobility in many plant species.  Unlike other dispersal mechanisms, wind dispersal is chiefly a function of seed morphology (and wind patterns).  Primarily isolated from the  complex ecology of the plant's environment during this critical stage of a life, physical simulation provides a way to  quantify the fitness of different seed morphologies. 
 
 
@@ -36,15 +69,19 @@ Specifically, by sampling from the space of possible seed morphologies and simul
 
 Detailed numerical analysis 
 
+\section{Technical Decription}
+
+\section{Goal}
+
+\section{Timeline}
+%maybe???
 
 
+\section*{Acknowledgements}
 
-\section{Technical Components}
+To Robert, for all the bagels.
 
+\bibliographystyle{acmsiggraph}
+\bibliography{template}
 
-
-\begin{thebibliography}{11}
-
-
-\end{thebibliography}
 \end{document}
