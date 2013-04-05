@@ -23,7 +23,7 @@
 
 \author{Michael Flashman\thanks{e-mail:mtf53@cornell.edu}\\Cornell University \and Tianhe Zhang \thanks{e-mail:tz249@cornell.edu}\\Cornell University}
 
-\pdfauthor{Michael Flashman \and Tianhe Zhang}
+\pdfauthor{Michael Flashman, Tianhe Zhang}
 
 \keywords{simulation, fluids,  rigid body, plant seeds, dispersion}
 
@@ -75,9 +75,9 @@ Taking advantage of the simulation framework developed by
 
 
 \section{Technical Description}
-The primary technical challenge of this project is to simulate the dynamics of an arbitrary solid, such as a seed, falling though a fluid, such as air.  This projcet is only meant to serve as a proof of concept for the research methadology described above, so it will suffice to perform the simulations in 2 dimensions.   
+The primary technical challenge of this project is to simulate the dynamics of an arbitrary solid, such as a seed, falling though a fluid, such as air.  This project is only meant to serve as a proof of concept for the research methodology described above, so it will suffice to perform the simulations in 2 dimensions.   
 
-We will implement a stable 2D fluid simulation following the methods outlined in XXX.   
+We will implement a stable 2D fluid simulation following the methods outlined in \cite{bridson2006}. This includes MAC grid implementation, boundary conditions implementation and a stable fluid solver. Besides the fluid simulation, we want to add rigid body into our fluid simulation so that fluid can interact with different rigid objects. This will require us to implement the coupling forces described in \cite{carlson2004}. We will also investigate more about the interaction between rigid body and fluid through papers such as \cite{guendelman2005} and \cite{baxter2004}
 
 
 
