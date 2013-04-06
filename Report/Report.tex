@@ -32,74 +32,48 @@
 \maketitle
 
 \begin{abstract}
-Wind dispersal of  seeds is an important mechanism for mobility in many plant species.  Unlike other dispersal mechanisms, wind dispersal is chiefly a function of seed morphology (and wind patterns).  Primarily isolated from the  complex ecology of the plant's environment during this critical stage of a life, physical simulation provides a way to  quantify the fitness of different seed morphologies.   As a first step toward this quantification, we will implement a  framework for stable 2D fluid simulation with rigid body coupling.
+Wind dispersal of  seeds is an important mechanism for mobility in many plant species.  Unlike other dispersal mechanisms, wind dispersal is chiefly a function of seed morphology.  Primarily isolated from the  complex ecology of the plant's environment during this critical stage of a life, physical simulation provides a way to  quantify the fitness of different seed morphologies .   As a first step toward this quantification, we  implement a  framework for stable 2D fluid simulation with rigid body coupling.
 \end{abstract}
 
 \keywordlist
 
 \copyrightspace
 
-\section{Introduction}
+\section{Overview}
 %Wind dispersal of  seeds is an important mechanism for mobility in many plant species.  Unlike other dispersal mechanisms, wind dispersal is chiefly a function of seed morphology (and wind patterns).  Primarily isolated from the  complex ecology of the plant's environment during this critical stage of a life, physical simulation provides a way to  quantify the fitness of different seed morphologies. 
 
 %Mobility is a central challenges for all living organism.   
 
-Dispersal is the process by which an organism moves way from it's place of birth.  This process is central to understanding  population structure and dynamics, gene-flow, evolution and speciation, as well as many other biological phenomenon\cite{levin1989}.   In general, the mechanism for dispersion is difficult to model precisely. An organism may be mobile for it's entire life, and it's motions may be dictated by complicated behavior and interactions with other species.  For sessile organisms, the dispersal process is often restricted to a single phase in the organism's life in which the organism is essentially passive \cite{nathan2000}.   Such organisms lend themselves to mechanistic understanding.  
+Dispersal is the process by which an organism moves way from it's place of birth.  This process is central to understanding  population structure and dynamics, gene-flow, evolution and speciation, as well as many other biological phenomenon \cite{levin1989}.   In general, the mechanism for dispersion is difficult to model precisely. An organism may be mobile for its entire life, and its motions may be dictated by complicated behavior and interactions with other species.  For sessile organisms, the dispersal process is often restricted to a single phase in the organism's life in which the organism is essentially passive \cite{nathan2000}.   Such organisms lend themselves to mechanistic understanding of dispersal.  
 
-Seed plants serve as a model candidate. But even in this passive system, the mechanism for distribution remain surpassingly complex.  Fruits, which beer a seed at it's center, provides one mechanism for seed dispersal, effectively by `convincing' certain frugivores  to eat them. Here, the dispersal process is handed off to an animal which is both much more adept to the task, and much more difficult to model. This plant animal exchange also has non-trivial evolutionary implications; the explosive evolution of fruit bearing plants is  attributed in part to this symbiotic relationships between plant and animals \cite{lorts2008}.  In contrast, wind dispersal is an entirely physical process for dispersion, notably decoupled from the complexity of biology.\footnote{Though wind dispersal is chiefly physical,  seed morphology  plays an important  role during other stages in a plant's life such as during germination. Germination is }
+Seed plants serve as a model species for studying dispersal. Even as a passive agent, the mechanisms behind seed dispersal can be surpassingly complex \cite{wilson2000}.  Fruits, which beer a seed at their center, are dispersed by frugivors.  While the seed remains passive, the dispersal process is strongly coupled  to the complex behavior of the carrier, making precise modeling difficult.  Incidentally, this plant--animal coupling has interesting evolutionary implications for both; the explosive evolution of fruit bearing plants is  attributed in part to this symbiotic relationship \cite{lorts2008}.  In contrast, wind dispersal is an entirely physical process, predominately decoupled from complex biological interactions.    
 
-Wind dispersed seeds have been studied previously through empirical analysis of seed morphology and flight characteristics \cite{augspurger1986}.  Much of this work has been applied to  theoretical ballistic and plum models  to obtain plausible explanations for spatial population dynamics and pattern formation \cite{levin2003}. Recent work has also considered  evolutionary implications of spatial segregation of specific plant species as a result of wind dispersal by looking at phenotypic changes across  populations \cite{Cheptou2008}.   A theoretical investigation of dispersal driven speciation is carried out in \cite{levin2010}.  
+Wind dispersed seeds have been studied previously through empirical analysis of seed morphology and flight characteristics \cite{augspurger1986}.  Much of this work has been applied to  theoretical ballistic and plum models  to obtain plausible explanations for spatial population dynamics and pattern formation \cite{levin2003}. Recent work has also considered  evolutionary implications of spatial segregation of  plant species as a result of wind dispersal by looking at phenotypic changes across  populations \cite{Cheptou2008}.   A theoretical investigation of dispersal driven speciation is carried out in \cite{levin2010}. 
 
-Taken together, these two approaches to the study of dispersal comprise a closed biological process:  seed morphology determines specific dispersive 
-  
+These two lines of research together  describe a closed cycle in a biological story: seed morphology determines  dispersal, dispersal determines spatial population dynamics, spatial population dynamics determine genetic mixing, and genetic mixing determines new seed morphology.  \footnote{In reality, this simple story of dispersion driven evolution is complicated by several factors. Seed morphology  plays an important  role in  other stages in a plant's life cycle. Seed size, for instance, influences germination success rate.  Inter-species competition effects  the evolution of plant characteristics.   Though seed morphology may not be effected directly, parameters coupled to dispersal, such as plant height and population density will be.  Finally, seed fitness is measured not by dispersive capacity, but by maximizing the likelihood that  seeds land in suitable habitat for germination.  But the distribution of suitable habitats is strongly affected population level competition. }  
 
+%With each non-dispersal specific seed relation, we must consider potential coupling to other biological process and their role on seed morphology. 
 
+Understanding how phenotypic changes to seed shape affect  flight characteristics remain a difficult but important challenge to the field, providing a link between phenotypic variation and dispersive outcome.  Some success has been achieved by construction low-dimensional flight models based on classical aerodynamic theory \cite{greene2005}.  However, careful physical modeling and simulation reveals that natural structures exhibit behavior that is not accurately described by aerodynamic theory, and instead depends on a full consideration of fluid and rigid-body coupling \cite{wang2005}\cite{wang2012}.   However, given the tremendous increase in computing power and speed (thanks in part to innovations in the graphics community!),  precise physical simulation is a viable approach to the problem. 
 
-, detailed understanding of the affect of phenotypic changeds    
+%Understanding how phenotypic changes to seed shape affect  flight characteristics remain a difficult but import challenge to the field.  This understanding provides a link between phenotypic variation and dispersive outcome.  More interestingly, it provides a mechanism for viewing 
 
-The remains a significant challenge to evolution the effect of phenotypic changes on wind dispersal   
+One of the most interesting features of simulation based quantification of flight characteristics is that in addition to a precise understand of real seed flight, we can also consider flight characteristics of seed shapes that do not exist in nature. By performing the flight simulation on seed shapes similar to those observed in nature, we can address questions of stability and optimality of real seed morphology.
 
-
-Because wind dispersal of seeds is determined by seed morphology and physics, it is in principle possible to determine 
-
- connect phenotypic seed traits to  
-
-Taking advantage of the simulation framework developed by 
-
-
-
-
-Wind dispersion of seeds is typically studied as a combination of empirical analysis of real seed flight characteristics and statistical modeling of seed plumes   .  While this approach effectively captures 
-
-
- Specifically, by sampling from the space of possible seed morphologies and simulating their flight characteristics, it is possible to generate a complete fitness landscape.  From this fitness landscape we may quantify local and global stability of real seeds.  Or we may consider morphological pathways through this space.  
- 
- 
-
-Most animals have adapted some physical mobility, making dispersal a process dominated by behavior.  For stationary creatures such as plants, dispersal is  
-
-
-A detailed understanding of this process is important for understanding many 
-
-
-
-\cite{wang2012}
-\cite{levin1989}
-
-Several 
-
-
+To go one step further, we may sample the space of all possible seed morphologies to generate a complete map of flight characteristics.  In this way, we can generate a complete fitness landscape of seed morphology.\footnote{Here the fitness landscape for wind dispersed seeds is measured not only by how far a seed travels, but also by how often a seed falls in in a habitable zone.  The distance plays an important role in the long term survival of the species, but the later is necessary for successful germination.}   While such a perspective is out of reach for most biological phenomenon, the distinctly physical nature of wind based seed dispersion provides a unique glimpse into the  the diverse space of possible morphologies and the evolutionary pathways that connect them.    
 
 \section{Technical Description}
-The primary technical challenge of this project is to simulate the dynamics of an arbitrary solid, such as a seed, falling though a fluid, such as air.  This project is only meant to serve as a proof of concept for the research methodology described above, so it will suffice to perform the simulations in 2 dimensions.   
+The primary technical challenge of this project is to simulate the dynamics of an arbitrary solid, such as a seed, falling though a fluid, such as air.  This project is only meant to serve as a proof of concept for the research agenda  described above.  With that in mind, we will focus on the simple and efficient implementation described in the animation literature.   As time allows we will compare the results of our simulations with those derived from more accurate methods \cite{wang2005-9}.
 
-We will implement a stable 2D fluid simulation following the methods outlined in \cite{bridson2006}. This includes MAC grid implementation, boundary conditions implementation and a stable fluid solver. Besides the fluid simulation, we want to add rigid body into our fluid simulation so that fluid can interact with different rigid objects. This will require us to implement the coupling forces described in \cite{carlson2004}. We will also investigate more about the interaction between rigid body and fluid through papers such as \cite{guendelman2005} and \cite{baxter2004}
+We will implement a stable 2D fluid simulation following the methods outlined in \cite{bridson2006}. This includes MAC grid implementation, boundary conditions implementation and a stable fluid solver. Besides the fluid simulation, we want to add rigid body into our fluid simulation so that fluid can interact with different rigid objects. This will require us to implement the coupling forces described in \cite{carlson2004}. We will also investigate more about the interaction between rigid body and fluid through papers such as \cite{guendelman2005} and \cite{baxter2004}.  As time allows, we will explore more accurate solution schemes described in \cite{osher2002}.
 
 \section{Goal}
+After the simulation framework is complete (and as time allows), we will implement the experimental portion of the project.  This begins with the generation of random 2D shapes.  For simplicity, we will only consider a low dimensional class of parametric  2D shapes.   We will try to maintain some correspondence between our shapes and real seed shape classification in \cite{augspurger1986}.   Once we have our class of shapes, we can perform simulations to generate average flight statistics for each shape.  This data then serves as the foundation for the fitness landscape. 
+
+As our shape models becomes more complex, it becomes more difficult to sample shape space.  Another experimental approach is to sample evolutionary pathways via random walks.   This experiment would certainly be fun, but more work is needed to establish  whether the these random walks bare any relation to real biological processes.  
 
 \section{Conclusion}
-
-Our simulation intensive approach has direct implications on the understanding of seed development and plant mobility.  It yields a physically based model for certain evolutionary features in plants.   Our approach yields a quantitative framework in which to consider many theoretical questions from evolutionary, developmental, and ecological biology.  
+We have described an simulation based approach  for quantifying the aerodynamics of random 2D shapes.  Applied to plant seeds, this approach provides for an (approximate) global understanding of the fitness landscape for seed morphology .  While we only present this project as a proof of concept, our approach has direct implications for the understanding of seed morphology , dispersal, population dynamics, and evolution,  as well as theoretical questions in evolutionary, developmental, and ecological biology.  
 
 
 \bibliographystyle{acmsiggraph}
