@@ -67,10 +67,10 @@ The primary technical challenge of this project is to simulate the dynamics of a
 
 We will implement a stable 2D fluid simulation following the methods outlined in \cite{bridson2006}. This includes MAC grid implementation, boundary conditions implementation and a stable fluid solver. Besides the fluid simulation, we want to add rigid body into our fluid simulation so that fluid can interact with different rigid objects. This will require us to implement the coupling forces described in \cite{carlson2004}. We will also investigate more about the interaction between rigid body and fluid through papers such as \cite{guendelman2005} and \cite{baxter2004}.  As time allows, we will explore more accurate solution schemes described in \cite{osher2002}.
 
+\section{Goal}
 After the simulation framework is complete (and as time allows), we will implement the experimental portion of the project.  This begins with the generation of random 2D shapes.  For simplicity, we will only consider a low dimensional class of parametric  2D shapes.   We will try to maintain some correspondence between our shapes and real seed shapes as described  in \cite{augspurger1986}.   Once we have our class of shapes, we can perform simulations to generate average flight statistics for each shape.  This data then serves as the foundation for the fitness landscape. 
 
 As our shape models becomes more complex, it becomes more difficult to sample shape space.  Another experimental approach is to sample evolutionary pathways via random walks.   This experiment would certainly be fun, but more work is needed to establish  whether the these random walks bare any relation to real biological processes.  
-
 
 \section{Conclusion}
 We have described a simulation based approach  for quantifying the aerodynamics of random 2D shapes.  Applied to plant seeds, this approach provides for an (approximate) global understanding of the fitness landscape for seed morphology.  While we only present this project as a proof of concept, our approach has direct implications for the understanding of seed morphology, dispersal, population dynamics, and evolution.
