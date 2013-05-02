@@ -58,6 +58,7 @@ public class Smoke implements GLEventListener
 	/** Toggle to advance simulation. */
 	boolean simulate      = false;
 	boolean veldisplay    = false;
+	boolean forcedisplay  = false;
 
 	/** Draws wireframe if true, and pixel blocks if false. */
 	boolean drawWireframe = false;
@@ -302,11 +303,30 @@ public class Smoke implements GLEventListener
 				for(int j=1; j<=n; j++) {
 					float y = (j - 0.5f)/(float)n;
 					Vector2f temp = new Vector2f(fs.u[Constants.I(i,j)], fs.v[Constants.I(i,j)]);
-					//temp.normalize();
 					//System.out.println(temp);
 					gl.glVertex2f(x, y);
 					float u = temp.x;
 					float v = temp.y;
+					gl.glVertex2f(x+u, y+v);
+					
+				}
+				gl.glEnd();
+			}
+		}
+		if(forcedisplay){
+			/// DON'T DRAW 0, n+1 border:
+			for(int i=1; i<=n; i++) {
+				gl.glBegin(gl.GL_LINES);
+				gl.glLineWidth(0.1f);
+				gl.glColor3f(0.0f, 1.0f, 0.0f);
+				float x = (i - 0.5f)/(float)n;
+
+				for(int j=1; j<=n; j++) {
+					float y = (j - 0.5f)/(float)n;
+					Vector2f temp = new Vector2f(fs.fx[Constants.I(i,j)], fs.fy[Constants.I(i,j)]);
+					gl.glVertex2f(x, y);
+					float u = 0.1f*temp.x;
+					float v = 0.1f*temp.y;
 					gl.glVertex2f(x+u, y+v);
 					
 				}
@@ -407,6 +427,12 @@ public class Smoke implements GLEventListener
 		else if (key == 'v') {// velocity field display
 			System.out.println("VELOCITY FIELD");
 			veldisplay = !veldisplay;
+			forcedisplay = false;
+		}
+		else if (key == 'f') {// force field display
+			System.out.println("FORCE FIELD");
+			forcedisplay = !forcedisplay;
+			veldisplay = false;
 		}
 		else if (e.toString().contains("Escape")) {
 			System.out.println("ESCAPE");
