@@ -36,7 +36,7 @@ public class Constants
     public static final float V_f = 2f;
 
     /** Gathering rate amplitude, V_g (default: 0.0005)  */
-    public static final float V_g = 0.0005f;
+    public static final float V_g = 0.05f;
 
     /** Drag force amplitude, V_d (default: 0.5)  */
     public static final float V_d = 0.5f;
