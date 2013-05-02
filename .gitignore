@@ -45,3 +45,8 @@ Thumbs.db
 # Autosaved files #
 ###################
 *.*~
+
+# Eclipse project setup #
+#########################
+*.classpath
+*.project
