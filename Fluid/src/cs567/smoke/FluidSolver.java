@@ -290,7 +290,11 @@ public class FluidSolver
 		project(u, v, uOld, vOld);
 
 		// clear all input velocities for next frame
-		for(int i=0; i<size; i++)  uOld[i] = vOld[i] = 0; 
+		for(int i=0; i<size; i++)  {
+			uOld[i] = vOld[i] = 0; 
+		}
+		
+		control.keyframe.conserveDensity(d);
 	}
 
 
