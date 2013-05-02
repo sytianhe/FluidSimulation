@@ -81,14 +81,6 @@ public class SmokeKeyframe
 				"what kind of smoke keyframer are you!?!");
 	}
 
-	public void conserveDensity(float[] d){
-		float dSum = Utils.sum(d);
-		for (int i = 0; i<size; i++){
-			if(d[i]>0){
-				d[i] *= 1f+(rhoGoalSum-dSum)/dSum/10f;
-			}
-		}
-	}
 	public String toString() { 
 		return "SmokeKeyframe: "+imageFilename;
 	}

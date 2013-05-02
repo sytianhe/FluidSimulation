@@ -293,8 +293,6 @@ public class FluidSolver
 		for(int i=0; i<size; i++)  {
 			uOld[i] = vOld[i] = 0; 
 		}
-		
-		control.keyframe.conserveDensity(d);
 	}
 
 

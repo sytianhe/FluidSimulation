@@ -115,7 +115,13 @@ public class SmokeControlForces
 		/// IGNORE IF NO KEYFRAME:
 		if(keyframe==null) return;
 
-		/// DO SOMETHING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		float rhoGoalSum  = this.keyframe.rhoGoalSum;
+		float rhoSum = Utils.sum(rho);
+		for (int i = 0; i<size; i++){
+			if(rho[i]>0){
+				rho[i] *= 1f+(rhoGoalSum -rhoSum)/rhoSum/100f;
+			}
+		}
 	}
 
 
