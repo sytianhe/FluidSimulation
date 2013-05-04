@@ -27,4 +27,9 @@ public class RigidBody
 		density = d;
 	}
 	
+	/** Return the w ratio for cell (i,j) */
+	public double wRatio (int column, int row){
+		return 0;
+	}
+	
 }

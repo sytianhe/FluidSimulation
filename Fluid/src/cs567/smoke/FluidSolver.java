@@ -1,5 +1,7 @@
 package cs567.smoke;
 
+import java.util.ArrayList;
+
 import javax.vecmath.*;
 
 
@@ -37,6 +39,9 @@ public class FluidSolver
 
 	/** Smoke control force object. */
 	SmokeControlForces control;
+	
+	/** Rigid Body Lists */
+	ArrayList <RigidBody> RB = new ArrayList <RigidBody>();  
 
 	/**
 	 * Set the grid size and timestep, and builds simulation arrays.
@@ -277,6 +282,7 @@ public class FluidSolver
 			diffuse(0, v, vOld, Constants.VISCOSITY);
 		}
 
+		
 		// we create an incompressible field
 		// for more effective advection.
 		project(u, v, uOld, vOld);
@@ -288,16 +294,56 @@ public class FluidSolver
 
 		// make an incompressible field
 		project(u, v, uOld, vOld);
-
+		
 		// clear all input velocities for next frame
 		for(int i=0; i<size; i++)  {
 			uOld[i] = vOld[i] = 0; 
 		}
+		
+		// MAKE UPDATE FOR THE RIGID BODIES CELLS
+		rigidSolver(u, v);
 
 		control.keyframe.conserveDensity(d);
 
 	}
 
+	/** Update the velocities for the rigid bodies' cells;
+	 * 
+	 * @param u
+	 * @param v
+	 */
+	public void rigidSolver(float[] u, float[] v){
+		
+		double w;
+		for (int i = 1; i <= n; i++)
+		{
+			for (int j = 1; j <= n; j++)
+			{
+				for (RigidBody rb: RB){
+					w = rb.wRatio(i, j);
+					if (w != 0){
+						//FINDING S USING EQUATION (17) FROM THE CARLSON PAPER
+						
+						// collision portion
+						double collisionPortion = findCollision();
+						
+						// correction portion
+						double s = -(rb.density - d[I(i,j)]);
+						s = s*(0);
+						
+					}
+				}
+			}
+		}
+		
+		
+		
+		
+	}
+	
+	public double findCollision(){
+		return 0.;
+	}
 
 	/**
 	 * The basic density solving routine.
@@ -529,4 +575,8 @@ public class FluidSolver
 
 	/**  UTIL method for indexing 1d arrays */
 	public final int I(int i, int j){ return i + N*j; }
+
+	public void setRigidBody(ArrayList<RigidBody> rbs) {
+		RB = rbs;
+	}
 }

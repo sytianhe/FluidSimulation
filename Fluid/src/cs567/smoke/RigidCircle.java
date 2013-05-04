@@ -15,8 +15,9 @@ public class RigidCircle extends RigidBody
 
 	}
 
+	@Override
 	/** Return the w ratio for cell (i,j) */
-	public double wRatio (int row, int column){
+	public double wRatio (int column, int row){
 		
 		int numSample = 3;
 		int counter = 0;

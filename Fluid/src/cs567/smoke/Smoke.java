@@ -8,6 +8,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.media.opengl.GL;
@@ -64,7 +65,8 @@ public class Smoke implements GLEventListener
 	boolean drawWireframe = false;
 
 	FluidSolver fs;
-
+	ArrayList <RigidBody> rbs;
+	
 	MyMouseHandler mouseHandler;
 
 	SmokeControlForces control;
@@ -82,11 +84,16 @@ public class Smoke implements GLEventListener
 		if(imageKeyframes.length < 1) throw new NullPointerException("No image keyframes");
 
 		fs = new FluidSolver(); /// <<-- PARAMETERS IN "Constants" CLASS
-
+		
 		control = new SmokeControlForces();
 		loadKeyframes(imageKeyframes);
 		control.setKeyframe(keyframes[0]);
 		fs.setSmokeControl(control);
+		
+		RigidCircle rb = new RigidCircle(new Point2d(0.5,0.5), new Vector2d(0.0,1.0), 0.1, 0.1, 0.1);
+		rbs = new ArrayList<RigidBody>();
+		rbs.add(rb);
+		fs.setRigidBody(rbs);
 
 		/// INIT: RANDOM DENSITY:
 		if(false){
@@ -425,13 +432,23 @@ public class Smoke implements GLEventListener
 			drawWireframe = !drawWireframe;
 		}
 		else if (key == 'v') {// velocity field display
-			System.out.println("VELOCITY FIELD");
 			veldisplay = !veldisplay;
+			if (veldisplay){
+				System.out.println("VELOCITY FIELD ON");
+			}
+			else {
+				System.out.println("VELOCITY FIELD OFF");
+			}
 			forcedisplay = false;
 		}
 		else if (key == 'f') {// force field display
-			System.out.println("FORCE FIELD");
 			forcedisplay = !forcedisplay;
+			if (forcedisplay){
+				System.out.println("FORCE FIELD ON");
+			}
+			else{
+				System.out.println("FORCE FIELD OFF");
+			}
 			veldisplay = false;
 		}
 		else if (e.toString().contains("Escape")) {

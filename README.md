@@ -14,6 +14,10 @@ lib/vecmath.jar
 
 RUN:
 
+KEY:
+'f' : Display the force field of the scene
+'v': Display the velocity field of the scene
+
 
 COMPILE VIDEO:
 $ cd frames
