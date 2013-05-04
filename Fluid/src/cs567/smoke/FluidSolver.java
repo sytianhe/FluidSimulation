@@ -325,13 +325,17 @@ public class FluidSolver
 	 */
 	public void rigidSolver(float[] u, float[] v, float[] uPrev, float[] vPrev){
 		
-		double w;
+		double u_vR = 0;
+		double v_vR = 0;
+		double u_wR = 0;
+		double v_wR = 0;
+		double counter = 0;
 		for (int i = 1; i <= n; i++)
 		{
 			for (int j = 1; j <= n; j++)
 			{
 				for (RigidBody rb: RB){
-					w = rb.wRatio(i, j);
+					double w = rb.wRatio(i, j);
 					if (w != 0){
 						//FINDING S USING EQUATION (17) FROM THE CARLSON PAPER
 						
@@ -347,23 +351,57 @@ public class FluidSolver
 						double uS = densityS*((u[i]-uPrev[i])/Constants.dt/n_STEPS_PER_FRAME + velTermS[0] - fx[I(i,j)] );
 						double vS = densityS*((v[i]-vPrev[i])/Constants.dt/n_STEPS_PER_FRAME + velTermS[1] - fy[I(i,j)] );
 						
-						//update u and v
+						//update u and v using S
 						u[I(i,j)] = u[I(i,j)] + (float) (w * Constants.dt/n_STEPS_PER_FRAME/rb.density * (uS + collisionPortion));
 						v[I(i,j)] = v[I(i,j)] + (float) (w * Constants.dt/n_STEPS_PER_FRAME/rb.density * (vS + collisionPortion));
 						
-						int centerI = (int) (rb.x.x*Constants.N);
-						int centerJ = (int) (rb.x.y*Constants.N);
+						// CALCULATING u_R USING EQUATION (23) FROM THE CARLSON PAPER
 						
-//						rb.x.x = rb.x.x + u[I(centerI, centerJ)]*Constants.dt/n_STEPS_PER_FRAME;
-//						rb.x.y = rb.x.y + v[I(centerI, centerJ)]*Constants.dt/n_STEPS_PER_FRAME;
+						// updating v
+						u_vR = u_vR + u[I(i,j)]*w; 
+						v_vR = v_vR + v[I(i,j)]*w;
+						
+						// updating w
+						Vector2d r_i = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y);
+						double w_i = r_i.x*u[I(i,j)] - r_i.y*v[I(i,j)];
+						
+						u_wR = u_wR - r_i.y*w_i*w;
+						v_wR = v_wR + r_i.x*w_i*w;
+						
+						counter = counter + w;
 					}
 				}
 			}
 		}
 		
+		u_vR = u_vR/counter;
+		v_vR = v_vR/counter;
+		u_wR = u_wR/counter;
+		v_wR = v_wR/counter;
+		
+		for (int i = 1; i <= n; i++)
+		{
+			for (int j = 1; j <= n; j++)
+			{
+				for (RigidBody rb: RB){
+					double w = rb.wRatio(i, j);
+					if(w!=0){
+						
+						//UPDATING u AND v USING EQUATION (26) FROM THE CARLSON PAPER
+						u[I(i,j)] = (float) ((1 - w)*u[I(i,j)] + w*(u_vR + u_wR)) ;
+						v[I(i,j)] = (float) ((1 - w)*v[I(i,j)] + w*(v_vR+ v_wR));
+					}
+										
+					rb.x.x = (int)(rb.x.x + Constants.dt*u[I((int)rb.x.x, (int)rb.x.y)]);
+					rb.x.y = (int)(rb.x.y + Constants.dt*v[I((int)rb.x.x, (int)rb.x.y)]);
+				}
+			}	
+		}
+		
+	
 		
 	}	
-		
+	
 	public double[] findVelS(int i, int j, float[] u, float[] v){
 		double[] result = new double[2];
 		

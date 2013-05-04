@@ -91,7 +91,7 @@ public class Smoke implements GLEventListener
 		fs.setSmokeControl(control);
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
 		
-		RigidCircle rb = new RigidCircle(new Point2d(0.5,0.5), new Vector2d(0.0,1.0), 0.1, 0.1, 0.1);
+		RigidCircle rb = new RigidCircle(new Point2d(50,50), new Vector2d(0.0,1.0), 0.1, 0.1, 10);
 		rbs = new ArrayList<RigidBody>();
 		rbs.add(rb);
 		fs.setRigidBody(rbs);
@@ -310,7 +310,7 @@ public class Smoke implements GLEventListener
 					for (int i=0; i<intervals; i++)
 					{
 						double degInRad = ((double)i) * 2.0 * Math.PI / ((double)intervals);
-						gl.glVertex2d(rb.x.x + Math.cos(degInRad)*((RigidCircle)rb).radius, rb.x.y + Math.sin(degInRad)*((RigidCircle)rb).radius);
+						gl.glVertex2d(rb.x.x/Constants.N + Math.cos(degInRad)*((RigidCircle)rb).radius/Constants.N,(1.0 - rb.x.y/Constants.N) + Math.sin(degInRad)*((RigidCircle)rb).radius/Constants.N);
 						gl.glColor3d(1.0, 215.0/256.0, 0.0);
 					}
 					 
