@@ -36,6 +36,9 @@ public class FluidSolver
 
 	/** Curl grid */
 	float[] curl;
+	
+	/** Number of frames */
+	int n_STEPS_PER_FRAME = 1;
 
 	/** Smoke control force object. */
 	SmokeControlForces control;
@@ -236,6 +239,14 @@ public class FluidSolver
 	public void velocitySolver()
 	{
 		for(int i=0; i<size; i++)  fx[i] = fy[i] = 0; 
+		
+		float[] uPrev = new float[size];
+		float[] vPrev = new float[size];
+		for(int i=0; i<size; i++){
+			uPrev[i]=u[i];
+			vPrev[i]=v[i];
+		}
+		
 		// add velocity that was input by mouse
 		addSource(u, uOld);
 		addSource(v, vOld);
@@ -301,7 +312,7 @@ public class FluidSolver
 		}
 		
 		// MAKE UPDATE FOR THE RIGID BODIES CELLS
-		rigidSolver(u, v);
+		rigidSolver(u, v, uPrev, vPrev);
 
 		control.keyframe.conserveDensity(d);
 
@@ -312,7 +323,7 @@ public class FluidSolver
 	 * @param u
 	 * @param v
 	 */
-	public void rigidSolver(float[] u, float[] v){
+	public void rigidSolver(float[] u, float[] v, float[] uPrev, float[] vPrev){
 		
 		double w;
 		for (int i = 1; i <= n; i++)
@@ -328,17 +339,48 @@ public class FluidSolver
 						double collisionPortion = findCollision();
 						
 						// correction portion
-						double s = -(rb.density - d[I(i,j)]);
-						s = s*(0);
+						// density term -(rho_r-rho_f)
+						double densityS = -(rb.density - d[I(i,j)]);
 						
+						// velocity term (u dot DEL)u
+						double[] velTermS = findVelS(i, j, u, v);
+						double uS = densityS*((u[i]-uPrev[i])/Constants.dt/n_STEPS_PER_FRAME + velTermS[0] - fx[I(i,j)] );
+						double vS = densityS*((v[i]-vPrev[i])/Constants.dt/n_STEPS_PER_FRAME + velTermS[1] - fy[I(i,j)] );
+						
+						//update u and v
+						u[I(i,j)] = u[I(i,j)] + (float) (w * Constants.dt/n_STEPS_PER_FRAME/rb.density * (uS + collisionPortion));
+						v[I(i,j)] = v[I(i,j)] + (float) (w * Constants.dt/n_STEPS_PER_FRAME/rb.density * (vS + collisionPortion));
+						
+						int centerI = (int) (rb.x.x*Constants.N);
+						int centerJ = (int) (rb.x.y*Constants.N);
+						
+//						rb.x.x = rb.x.x + u[I(centerI, centerJ)]*Constants.dt/n_STEPS_PER_FRAME;
+//						rb.x.y = rb.x.y + v[I(centerI, centerJ)]*Constants.dt/n_STEPS_PER_FRAME;
 					}
 				}
 			}
 		}
 		
 		
+	}	
 		
+	public double[] findVelS(int i, int j, float[] u, float[] v){
+		double[] result = new double[2];
 		
+		// Using MAC grid: velocity on the edge;
+		double right_X = (u[I(i,j)] + u[I(i+1, j)])/2.0;
+		double right_Y = (v[I(i,j)] + v[I(i+1, j)])/2.0;
+		double left_X = (u[I(i,j)] + u[I(i-1, j)])/2.0;
+		double left_Y = (v[I(i,j)] + v[I(i-1, j)])/2.0;
+		double up_X = (u[I(i,j)] + u[I(i, j-1)])/2.0;
+		double up_Y = (v[I(i,j)] + v[I(i, j-1)])/2.0;
+		double down_X = (u[I(i,j)] + u[I(i, j+1)])/2.0;
+		double down_Y = (v[I(i,j)] + v[I(i, j+1)])/2.0;
+				
+		result[0] = u[I(i,j)]*(right_X-left_X) + v[I(i,j)]*(right_Y-left_Y);
+		result[1] = v[I(i,j)]*(up_X-down_X) + v[I(i,j)]*(up_Y-down_Y);		
+		
+		return result;
 	}
 	
 	public double findCollision(){
@@ -578,5 +620,10 @@ public class FluidSolver
 
 	public void setRigidBody(ArrayList<RigidBody> rbs) {
 		RB = rbs;
+	}
+
+	public void setNumerofFrame(int n_STEPS_PER_FRAME) {
+		// TODO Auto-generated method stub
+		this.n_STEPS_PER_FRAME = n_STEPS_PER_FRAME;
 	}
 }

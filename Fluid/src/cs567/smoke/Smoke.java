@@ -89,6 +89,7 @@ public class Smoke implements GLEventListener
 		loadKeyframes(imageKeyframes);
 		control.setKeyframe(keyframes[0]);
 		fs.setSmokeControl(control);
+		fs.setNumerofFrame(N_STEPS_PER_FRAME);
 		
 		RigidCircle rb = new RigidCircle(new Point2d(0.5,0.5), new Vector2d(0.0,1.0), 0.1, 0.1, 0.1);
 		rbs = new ArrayList<RigidBody>();
@@ -298,6 +299,24 @@ public class Smoke implements GLEventListener
 				gl.glEnd();
 			}
 			
+		}
+		
+		if(rbs!=null){
+			for (RigidBody rb: rbs){
+				if(rb instanceof RigidCircle){
+					gl.glLineWidth(3.0f);
+					gl.glBegin(GL2.GL_LINE_LOOP);
+					int intervals = 100;
+					for (int i=0; i<intervals; i++)
+					{
+						double degInRad = ((double)i) * 2.0 * Math.PI / ((double)intervals);
+						gl.glVertex2d(rb.x.x + Math.cos(degInRad)*((RigidCircle)rb).radius, rb.x.y + Math.sin(degInRad)*((RigidCircle)rb).radius);
+						gl.glColor3d(1.0, 215.0/256.0, 0.0);
+					}
+					 
+					gl.glEnd();
+				}
+			}
 		}
 		if(veldisplay){
 			/// DON'T DRAW 0, n+1 border:
@@ -525,7 +544,7 @@ public class Smoke implements GLEventListener
 					"images/N.png",
 					"images/E.png",
 					"images/L.png",
-					"images/mother.png",
+					"images/L.png",
 			"images/cornellLogo.png"};
 			if(args.length > 0)  imageKeyframes = args;
 			System.out.println("Images: "+(Arrays.asList(imageKeyframes)));
