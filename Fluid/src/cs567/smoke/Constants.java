@@ -12,10 +12,10 @@ public class Constants
 {
     /** Time-step size. Note that explicitly integrated smoke-control
      * forcing/density terms can impose step-size restrictions. */
-    public static final float dt = 0.033f;/// <-- MAY NEED TO REDUCE
+    public static final float dt = 0.01f;/// <-- MAY NEED TO REDUCE
 
     /** Resolution of N-by-N computational grid. */
-    public static final int N = 100;
+    public static final int N = 120;
 
     /** Resolution of (n+2)-by-(n+2) computational grid. */
     public static final int n = N-2;/// <-- DO NOT CHANGE
@@ -36,14 +36,14 @@ public class Constants
     public static final float V_f = 2f;
 
     /** Gathering rate amplitude, V_g (default: 0.0005)  */
-    public static final float V_g = 0.05f;
+    public static final float V_g = 0.2f;
 
     /** Drag force amplitude, V_d (default: 0.5)  */
     public static final float V_d = 0.5f;
 
     /** Smoke diffusion coefficient (default: 0.0001). Nonzero values are needed (I
      * believe) to avoid instabilities during smoke control. */
-    public static final float SMOKE_DIFFUSION = 0.0001f;
+    public static final float SMOKE_DIFFUSION = 0.00001f;
 
     /** Viscosity (velocity diffusion coefficient). Default is zero
      * since we try hard to get rid of numerical diffusion (e.g.,

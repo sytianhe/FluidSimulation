@@ -508,7 +508,7 @@ public class Smoke implements GLEventListener
 					"images/N.png",
 					"images/E.png",
 					"images/L.png",
-					"images/L.png",
+					"images/mother.png",
 			"images/cornellLogo.png"};
 			if(args.length > 0)  imageKeyframes = args;
 			System.out.println("Images: "+(Arrays.asList(imageKeyframes)));

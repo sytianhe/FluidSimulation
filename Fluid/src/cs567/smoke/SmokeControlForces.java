@@ -79,7 +79,6 @@ public class SmokeControlForces
 		float[] rhoGoal     = currentKeyframe.rhoGoal;
 		float[] rhoGoalBlur = currentKeyframe.rhoGoalBlur;
 
-		float something = 0;// ;)
 		for(int i=1; i<=n; i++) {
 			for(int j=1; j<=n; j++) {
 
@@ -90,19 +89,35 @@ public class SmokeControlForces
 				float g_Y = ( (rho[I(i,j+1)] - rhoGoal[I(i,j+1)])   -  (rho[I(i,j)] - rhoGoal[I(i,j)]) ) / 1f ;
 
 //				// DIFFUSION COEFF (AVERAGE ON EDGES, x,y,X,Y):
-//				float D_x = ( (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) + (rho[I(i-1,j)] * rhoGoalBlur[I(i-1,j)]) ) / 2f ;
-//				float D_X = ( (rho[I(i+1,j)] * rhoGoalBlur[I(i+1,j)]) + (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) ) / 2f ;
-//				float D_y = ( (rho[I(i,j)] * rhoGoalBlur[I(i,j)])   +  (rho[I(i,j-1)] * rhoGoalBlur[I(i,j-1)]) ) / 2f ;
-//				float D_Y = ( (rho[I(i,j+1)] * rhoGoalBlur[I(i,j+1)])   + (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) ) / 2f ;
+				float D_x = ( (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) + (rho[I(i-1,j)] * rhoGoalBlur[I(i-1,j)]) ) / 2f ;
+				float D_X = ( (rho[I(i+1,j)] * rhoGoalBlur[I(i+1,j)]) + (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) ) / 2f ;
+				float D_y = ( (rho[I(i,j)] * rhoGoalBlur[I(i,j)])   +  (rho[I(i,j-1)] * rhoGoalBlur[I(i,j-1)]) ) / 2f ;
+				float D_Y = ( (rho[I(i,j+1)] * rhoGoalBlur[I(i,j+1)])   + (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) ) / 2f ;
 
-				float D_x = ( (rho[I(i,j)]   + rho[I(i-1,j)] ) /2f ) * ( ( rhoGoalBlur[I(i,j)]    + rhoGoalBlur[I(i-1,j)]) / 2f ) ;
-				float D_X = ( (rho[I(i+1,j)] + rho[I(i,j)] ) /2f   ) * ( ( rhoGoalBlur[I(i+1,j)]  + rhoGoalBlur[I(i,j)])   / 2f ) ;
-				float D_y = ( (rho[I(i,j)]   + rho[I(i,j-1)] ) /2f ) * ( ( rhoGoalBlur[I(i,j)]    + rhoGoalBlur[I(i,j-1)]) / 2f ) ;
-				float D_Y = ( (rho[I(i,j+1)] + rho[I(i,j)]   ) /2f ) * ( (rhoGoalBlur[I(i,j+1)]   + rhoGoalBlur[I(i,j)])   / 2f ) ;
-				
+//				float D_x = ( (rho[I(i,j)]   + rho[I(i-1,j)] ) /2f ) * ( ( rhoGoalBlur[I(i,j)]    + rhoGoalBlur[I(i-1,j)]) / 2f ) ;
+//				float D_X = ( (rho[I(i+1,j)] + rho[I(i,j)] ) /2f   ) * ( ( rhoGoalBlur[I(i+1,j)]  + rhoGoalBlur[I(i,j)])   / 2f ) ;
+//				float D_y = ( (rho[I(i,j)]   + rho[I(i,j-1)] ) /2f ) * ( ( rhoGoalBlur[I(i,j)]    + rhoGoalBlur[I(i,j-1)]) / 2f ) ;
+//				float D_Y = ( (rho[I(i,j+1)] + rho[I(i,j)]   ) /2f ) * ( (rhoGoalBlur[I(i,j+1)]   + rhoGoalBlur[I(i,j)])   / 2f ) ;
 				
 				// DIV (D GRAD(rho-rhoGoal)) (USING EDGE-BASED H=D GRAD(...)):
-				rate[I(i,j)] = Constants.V_g * (  (D_X * g_X - D_x * g_x ) /1f + (D_Y * g_Y - D_y * g_y ) /1f );
+				// rate[I(i,j)] = Constants.V_g * (  (D_X * g_X - D_x * g_x ) /1f + (D_Y * g_Y - D_y * g_y ) /1f );
+				
+				// FIRST TERM: find V dot GRAD (F)
+				float V_x = (g_x + g_X)/2f;
+				float V_y = (g_y + g_Y)/2f;
+				float dx_F = (D_X - D_x)/1f;
+				float dy_F = (D_Y - D_y)/1f;
+				
+				float first_term = V_x*dx_F+V_y*dy_F;
+				
+				// SECOND TERM: find F * GRAD V
+				float F = rho[I(i,j)]*rhoGoalBlur[I(i,j)];
+				float dxVx = (g_X - g_x)/1f;
+				float dyVy = (g_Y - g_y)/1f;
+				
+				float second_term = F*(dxVx + dyVy);
+				
+				rate[I(i,j)] = Constants.V_g * (first_term + second_term);
 			}
 		}
 	}
