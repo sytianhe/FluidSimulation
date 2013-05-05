@@ -1,5 +1,7 @@
 package cs567.smoke;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -21,10 +23,16 @@ public class RigidBody
 	double   density = 0;
 	
 	/** Mass */
-	double   mass = 0;
+	double   mass;
 	
-	public RigidBody (Point2d centerMass, Vector2d LinVel, double theta, double AngVel, double d){
-		x = centerMass;
+	/** Volume */
+	double volume;
+	
+	/** MomentOfInertia */
+	double momentOfIntertia;
+	
+	public RigidBody (Point2d centerOfMass, Vector2d LinVel, double theta, double AngVel, double d){
+		x = centerOfMass;
 		v = LinVel;
 		omega = AngVel;
 		density = d;
@@ -36,4 +44,7 @@ public class RigidBody
 		return 0;
 	}
 	
+	public void display(GL2 gl){
+		
+	}
 }

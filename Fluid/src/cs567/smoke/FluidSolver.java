@@ -29,10 +29,10 @@ public class FluidSolver
 	float[] d, dOld;
 
 	/** X-velocity grids */
-	float[] u, uOld, fx;
+	float[] u, uOld, fx, uPrev;
 
 	/** Y-velocity grids */
-	float[] v, vOld, fy;
+	float[] v, vOld, fy, vPrev;
 
 	/** Curl grid */
 	float[] curl;
@@ -91,11 +91,13 @@ public class FluidSolver
 		if(curl==null) curl = new float[size];
 		if(fx==null)   fx   = new float[size];
 		if(fy==null)   fy   = new float[size];
+		if(uPrev==null) uPrev = new float[size];
+		if(vPrev==null) vPrev = new float[size];
 
 
 		for (int i = 0; i < size; i++)
 		{
-			u[i] = uOld[i] = fx[i] = v[i] = vOld[i] = fy[i] = 0.0f;
+			u[i] = uOld[i] = fx[i] = v[i] = vOld[i] = fy[i] = uPrev[i] = vPrev[i] = 0.0f;
 			d[i] = dOld[i] = curl[i] = 0.0f;
 		}
 
@@ -238,33 +240,33 @@ public class FluidSolver
 
 	public void velocitySolver()
 	{
-		for(int i=0; i<size; i++)  fx[i] = fy[i] = 0; 
-		
-		float[] uPrev = new float[size];
-		float[] vPrev = new float[size];
-		for(int i=0; i<size; i++){
-			uPrev[i]=u[i];
-			vPrev[i]=v[i];
+		for(int i=0; i<size; i++)  fx[i] = fy[i] = 0; 		
+		for(int ij=0; ij<size; ij++){
+			uPrev[ij]=u[ij];
+			vPrev[ij]=v[ij];
 		}
 		
 		// add velocity that was input by mouse
 		addSource(u, uOld);
 		addSource(v, vOld);
+		//add(fx,uOld);
+		//add(fy,vOld);
+
 
 		if(control != null)  {/// CONTROL:
 			// ADD IN DRIVING FORCE:
 			control.getDrivingForce(uOld, vOld, d); 
-			for (int ii = 0; ii < size; ii++){
-				fx[ii] += uOld[ii];
-				fy[ii] += vOld[ii];
-			}
+
 			addSource(u, uOld);
 			addSource(v, vOld);
+			//add(fx,uOld);
+			//add(fy,vOld);
+			
 
 			// DAMP MOMENTUM:
 			for(int ij=0; ij<size; ij++) {
-				u[ij] -= Constants.V_d * dt * u[ij];
-				v[ij] -= Constants.V_d * dt * v[ij];
+				//u[ij] -= Constants.V_d * dt * u[ij];
+				//v[ij] -= Constants.V_d * dt * v[ij];
 				fx[ij] -= Constants.V_d * u[ij];
 				fy[ij] -= Constants.V_d * v[ij];
 			}
@@ -272,17 +274,16 @@ public class FluidSolver
 
 		// add in vorticity confinement force
 		vorticityConfinement(uOld, vOld);
-		for (int ii = 0; ii < size; ii++){
-			fx[ii] += uOld[ii];
-			fy[ii] += vOld[ii];
-		}
+
 		addSource(u, uOld);
 		addSource(v, vOld);
+		//add(fx,uOld);
+		//add(fy,vOld);
 
 		// add in buoyancy force
 		buoyancy(vOld, Constants.BUOYANCY);
 		addSource(v, vOld);
-
+		//add(fy,vOld);
 		// swapping arrays for economical mem use
 		// and calculating diffusion in velocity.
 		if(Constants.VISCOSITY > 0) {
@@ -298,6 +299,7 @@ public class FluidSolver
 		// for more effective advection.
 		project(u, v, uOld, vOld);
 		swapU(); swapV();
+		
 
 		// self-advect velocities (SLOTH: treated individually)
 		advect(1, u, uOld, uOld, vOld);
@@ -306,29 +308,41 @@ public class FluidSolver
 		// make an incompressible field
 		project(u, v, uOld, vOld);
 		
-		// clear all input velocities for next frame
-		for(int i=0; i<size; i++)  {
-			uOld[i] = vOld[i] = 0; 
-		}
 		
 		// MAKE UPDATE FOR THE RIGID BODIES CELLS
 		rigidSolver(u, v, uPrev, vPrev);
 
-		control.keyframe.conserveDensity(d);
+		// clear all input velocities for next frame
+		for(int i=0; i<size; i++)  {
+			uOld[i] = vOld[i] = 0; 
+		}
+
 
 	}
 
-	/** Update the velocities for the rigid bodies' cells;
+	/** Update the velocities for the rigid bodies' cells.  See Carleson et al, Eqs 17 and 18
 	 * 
 	 * @param u
 	 * @param v
 	 */
 	public void rigidSolver(float[] u, float[] v, float[] uPrev, float[] vPrev){
 
+		
+		//Compute Advection term 
+		float[] advectionTermU = new float[size]; 
+		float[] advectionTermV = new float[size]; 
+		uDotDel(u,u,v,advectionTermU);
+		uDotDel(v,u,v,advectionTermV);
+
+
 		for (RigidBody rb: RB){
-			rb.v = new Vector2d();
+			
+			rb.x.x += dt*rb.v.x;
+			rb.x.y += dt*rb.v.y;
+			rb.theta += dt*rb.omega;
+			
+			rb.v.set(0.0,0.0);
 			rb.omega = 0;
-			double counter = 0;
 			for (int i = 1; i <= n; i++)
 			{
 				for (int j = 1; j <= n; j++)
@@ -338,48 +352,47 @@ public class FluidSolver
 						//FINDING S USING EQUATION (17) FROM THE CARLSON PAPER
 
 						// collision portion
-						double collisionPortion = findCollision();
+						double collisionPortion = accumulateRigidBodyForces();  //DOES NOTHING CURRENTLY
 
 						// correction portion
 						// density term -(rho_r-rho_f)
-						double densityS = -(rb.density - Constants.FLUID_DENSITY);
+						double relDensity = (rb.density - Constants.FLUID_DENSITY);
 
 						// velocity term (u dot DEL)u
-						double[] velTermS = findVelS(i, j, u, v);
-						double uS = densityS*((u[i]-uPrev[i])/Constants.dt + velTermS[0] - fx[I(i,j)] );
-						double vS = densityS*((v[i]-vPrev[i])/Constants.dt + velTermS[1] - fy[I(i,j)] );
+						double uS =  -relDensity * ((u[i]-uPrev[i])/Constants.dt  + advectionTermU[I(i,j)] - fx[I(i,j)] );
+						double vS =  -relDensity * ((v[i]-vPrev[i])/Constants.dt  + advectionTermV[I(i,j)] - fy[I(i,j)] );
 
 						//update u and v using S
-						u[I(i,j)] = u[I(i,j)] + (float) (w * Constants.dt/rb.density * (uS + collisionPortion));
-						v[I(i,j)] = v[I(i,j)] + (float) (w * Constants.dt/rb.density * (vS + collisionPortion));
+						u[I(i,j)] += (float) (w * Constants.dt/rb.density * (uS + collisionPortion ));
+						v[I(i,j)] += (float) (w * Constants.dt/rb.density * (vS + collisionPortion - 10*rb.density ));  //add gravity to rb
 
 						
 						// CALCULATING u_R USING EQUATION (23) FROM THE CARLSON PAPER
 						// updating v
-						rb.v.x += u[I(i,j)]*w; 
-						rb.v.y += v[I(i,j)]*w;
+						rb.v.x += rb.density * u[I(i,j)]*w; 
+						rb.v.y += rb.density * v[I(i,j)]*w;
 
 						// updating w
-						Vector2d r_i = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y);
-						rb.omega += r_i.x*u[I(i,j)] - r_i.y*v[I(i,j)];
-						
-						counter = counter + w;
+						Vector2d r = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y);  //seperation between cell and x_cm
+						rb.omega += rb.density * (r.x*v[I(i,j)] - r.y*u[I(i,j)] ) * w  ;
 					}
 				}
 			}
 			
-			rb.v.scale(1.0/counter);
-			rb.omega *= (1.0/counter);
-			
+			rb.v.scale(1.0/rb.mass);
+			rb.omega /= rb.momentOfIntertia;
+			System.out.println(rb.v);
+			System.out.println(rb.omega);
+
 			for (int i = 1; i <= n; i++)
 			{
 				for (int j = 1; j <= n; j++)
 				{
 					double w = rb.wRatio(i, j);
 					if (w != 0){
-						Vector2d r_i = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y);
-						double u_UR = rb.v.x - rb.omega*r_i.y;
-						double v_UR = rb.v.y + rb.omega*r_i.x;
+						Vector2d r = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y); //seperation vector
+						double u_UR = rb.v.x - rb.omega*r.y;
+						double v_UR = rb.v.y + rb.omega*r.x;
 						
 						//UPDATING u AND v USING EQUATION (26) FROM THE CARLSON PAPER
 						u[I(i,j)] = (float) ((1 - w)*u[I(i,j)] + w*(u_UR)) ;
@@ -388,35 +401,39 @@ public class FluidSolver
 				}
 			}
 			
-			rb.x.x = rb.x.x + dt*rb.v.x;
-			rb.x.y = rb.x.y + dt*rb.v.y;
-			rb.theta += dt*rb.omega;
+
 			
 			System.out.println(rb.x);
 			System.out.println(rb.theta);
 		}
 	}	
 	
-	public double[] findVelS(int i, int j, float[] u, float[] v){
-		double[] result = new double[2];
+	/**
+	 * Compute (u dot Del) f at each grid point
+	 * @param result Array to store the result 
+	 * @param f a scalar field to which we apply u dot del 
+	 * @param u x-component of vector field u
+	 * @param v y-comonent of vector field u
+	 */
+	public void uDotDel( float[] f , float[] u, float[] v, float[] result ){
+
+		for (int i = 1; i <= n; i++)
+		{
+			for (int j = 1; j <= n; j++)
+			{
 		
-		// Using MAC grid: velocity on the edge;
-		double right_X = (u[I(i,j)] + u[I(i+1, j)])/2.0;
-		double right_Y = (v[I(i,j)] + v[I(i+1, j)])/2.0;
-		double left_X = (u[I(i,j)] + u[I(i-1, j)])/2.0;
-		double left_Y = (v[I(i,j)] + v[I(i-1, j)])/2.0;
-		double down_X = (u[I(i,j)] + u[I(i, j-1)])/2.0;
-		double down_Y = (v[I(i,j)] + v[I(i, j-1)])/2.0;
-		double up_X = (u[I(i,j)] + u[I(i, j+1)])/2.0;
-		double up_Y = (v[I(i,j)] + v[I(i, j+1)])/2.0;
+				// Using MAC grid: field on the edge;
+				double f_right = (f[I(i,j)] + f[I(i+1, j)])/2.0;
+				double f_left = (f[I(i,j)] + f[I(i-1, j)])/2.0;
+				double f_down = (f[I(i,j)] + f[I(i, j-1)])/2.0;
+				double f_up = (f[I(i,j)] + f[I(i, j+1)])/2.0;
 				
-		result[0] = u[I(i,j)]*(right_X-left_X) + v[I(i,j)]*(right_Y-left_Y);
-		result[1] = v[I(i,j)]*(up_X-down_X) + v[I(i,j)]*(up_Y-down_Y);		
-		
-		return result;
+				result[I(i,j)] = (float) (u[I(i,j)]*(f_right-f_left) + v[I(i,j)]*(f_up-f_down));
+			}
+		}
 	}
 	
-	public double findCollision(){
+	public double accumulateRigidBodyForces(){
 		return 0.;
 	}
 
@@ -443,7 +460,7 @@ public class FluidSolver
 			control.getGatheringRate(rate, d);
 			for(int i=0; i<size; i++) d[i] += dt * rate[i];
 
-			control.normalizeDensity(d);///<<< DOES NOTHING SO FAR
+			control.normalizeDensity(d);
 		}
 
 		// clear input density array for next frame
@@ -457,6 +474,13 @@ public class FluidSolver
 	{
 		for (int i=0; i<size; i++)
 			x[i] += dt * x0[i];
+	}
+
+	/** x +=  x0 */
+	private void add(float[] x, float[] x0)
+	{
+		for (int i=0; i<size; i++)
+			x[i] += x0[i];
 	}
 
 
@@ -651,7 +675,7 @@ public class FluidSolver
 	/**  UTIL method for indexing 1d arrays */
 	public final int I(int i, int j){ return i + N*j; }
 
-	public void setRigidBody(ArrayList<RigidBody> rbs) {
+	public void addRigidBodies(ArrayList<RigidBody> rbs) {
 		RB = rbs;
 	}
 

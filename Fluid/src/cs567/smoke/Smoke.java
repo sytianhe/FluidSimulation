@@ -87,14 +87,14 @@ public class Smoke implements GLEventListener
 
 		control = new SmokeControlForces();
 		loadKeyframes(imageKeyframes);
-		control.setKeyframe(keyframes[0]);
+		//control.setKeyframe(keyframes[0]);
 		fs.setSmokeControl(control);
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
 
-		RigidCircle rb = new RigidCircle(new Point2d(50,50), new Vector2d(0.0,0.0), 0, 0, 2, 10);
+		RigidCircle rb = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 10, 10);
 		rbs = new ArrayList<RigidBody>();
 		rbs.add(rb);
-		fs.setRigidBody(rbs);
+		fs.addRigidBodies(rbs);
 
 		/// INIT: RANDOM DENSITY:
 		if(false){
@@ -303,19 +303,7 @@ public class Smoke implements GLEventListener
 
 		if(rbs!=null){
 			for (RigidBody rb: rbs){
-				if(rb instanceof RigidCircle){
-					gl.glLineWidth(3.0f);
-					gl.glBegin(GL2.GL_LINE_LOOP);
-					int intervals = 100;
-					for (int i=0; i<intervals+1; i++)
-					{
-						double degInRad = ((double)i) * 2.0 * Math.PI / ((double)intervals);
-						gl.glVertex2d(rb.x.x/Constants.N + Math.cos(degInRad)*((RigidCircle)rb).radius/Constants.N,(1.0 - rb.x.y/Constants.N) + Math.sin(degInRad)*((RigidCircle)rb).radius/Constants.N);
-						gl.glColor3d(1.0, 215.0/256.0, 0.0);
-					}
-
-					gl.glEnd();
-				}
+				rb.display(gl);
 			}
 		}
 		if(veldisplay){
