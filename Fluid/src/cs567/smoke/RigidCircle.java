@@ -8,8 +8,8 @@ public class RigidCircle extends RigidBody
 	/** Radius */
 	double 	 radius = 0;
 	
-	public RigidCircle(Point2d centerMass, Vector2d LinVel, double AngVel, double d, int r) {
-		super(centerMass, LinVel, AngVel, d);
+	public RigidCircle(Point2d centerMass, Vector2d LinVel,double theta, double AngVel, double d, int r) {
+		super(centerMass, LinVel,theta, AngVel, d);
 		radius =r;
 		mass = Math.PI*r*r*d;
 
@@ -21,7 +21,6 @@ public class RigidCircle extends RigidBody
 		
 		int numSample = 3;
 		int counter = 0;
-		double step = 1.0/Constants.N;
 		
 		for (int i=0; i<numSample; i++){
 			for(int j=0; j<numSample; j++){

@@ -53,4 +53,7 @@ public class Constants
 
     /** Smoke buoyancy (dimensionless) (default: 1) */
     public static final float BUOYANCY = 1.f;
+    
+    /** Fluid density */
+    public static final float FLUID_DENSITY = 1F;
 }

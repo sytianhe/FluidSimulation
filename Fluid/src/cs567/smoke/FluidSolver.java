@@ -324,82 +324,77 @@ public class FluidSolver
 	 * @param v
 	 */
 	public void rigidSolver(float[] u, float[] v, float[] uPrev, float[] vPrev){
-		
-		double u_vR = 0;
-		double v_vR = 0;
-		double u_wR = 0;
-		double v_wR = 0;
-		double counter = 0;
-		for (int i = 1; i <= n; i++)
-		{
-			for (int j = 1; j <= n; j++)
+
+		for (RigidBody rb: RB){
+			rb.v = new Vector2d();
+			rb.omega = 0;
+			double counter = 0;
+			for (int i = 1; i <= n; i++)
 			{
-				for (RigidBody rb: RB){
+				for (int j = 1; j <= n; j++)
+				{
 					double w = rb.wRatio(i, j);
 					if (w != 0){
 						//FINDING S USING EQUATION (17) FROM THE CARLSON PAPER
-						
+
 						// collision portion
 						double collisionPortion = findCollision();
-						
+
 						// correction portion
 						// density term -(rho_r-rho_f)
-						double densityS = -(rb.density - d[I(i,j)]);
-						
+						double densityS = -(rb.density - Constants.FLUID_DENSITY);
+
 						// velocity term (u dot DEL)u
 						double[] velTermS = findVelS(i, j, u, v);
-						double uS = densityS*((u[i]-uPrev[i])/Constants.dt/n_STEPS_PER_FRAME + velTermS[0] - fx[I(i,j)] );
-						double vS = densityS*((v[i]-vPrev[i])/Constants.dt/n_STEPS_PER_FRAME + velTermS[1] - fy[I(i,j)] );
-						
+						double uS = densityS*((u[i]-uPrev[i])/Constants.dt + velTermS[0] - fx[I(i,j)] );
+						double vS = densityS*((v[i]-vPrev[i])/Constants.dt + velTermS[1] - fy[I(i,j)] );
+
 						//update u and v using S
-						u[I(i,j)] = u[I(i,j)] + (float) (w * Constants.dt/n_STEPS_PER_FRAME/rb.density * (uS + collisionPortion));
-						v[I(i,j)] = v[I(i,j)] + (float) (w * Constants.dt/n_STEPS_PER_FRAME/rb.density * (vS + collisionPortion));
+						u[I(i,j)] = u[I(i,j)] + (float) (w * Constants.dt/rb.density * (uS + collisionPortion));
+						v[I(i,j)] = v[I(i,j)] + (float) (w * Constants.dt/rb.density * (vS + collisionPortion));
+
 						
 						// CALCULATING u_R USING EQUATION (23) FROM THE CARLSON PAPER
-						
 						// updating v
-						u_vR = u_vR + u[I(i,j)]*w; 
-						v_vR = v_vR + v[I(i,j)]*w;
-						
+						rb.v.x += u[I(i,j)]*w; 
+						rb.v.y += v[I(i,j)]*w;
+
 						// updating w
 						Vector2d r_i = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y);
-						double w_i = r_i.x*u[I(i,j)] - r_i.y*v[I(i,j)];
-						
-						u_wR = u_wR - r_i.y*w_i*w;
-						v_wR = v_wR + r_i.x*w_i*w;
+						rb.omega += r_i.x*u[I(i,j)] - r_i.y*v[I(i,j)];
 						
 						counter = counter + w;
 					}
 				}
 			}
-		}
-		
-		u_vR = u_vR/counter;
-		v_vR = v_vR/counter;
-		u_wR = u_wR/counter;
-		v_wR = v_wR/counter;
-		
-		for (int i = 1; i <= n; i++)
-		{
-			for (int j = 1; j <= n; j++)
+			
+			rb.v.scale(1.0/counter);
+			rb.omega *= (1.0/counter);
+			
+			for (int i = 1; i <= n; i++)
 			{
-				for (RigidBody rb: RB){
+				for (int j = 1; j <= n; j++)
+				{
 					double w = rb.wRatio(i, j);
-					if(w!=0){
+					if (w != 0){
+						Vector2d r_i = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y);
+						double u_UR = rb.v.x - rb.omega*r_i.y;
+						double v_UR = rb.v.y + rb.omega*r_i.x;
 						
 						//UPDATING u AND v USING EQUATION (26) FROM THE CARLSON PAPER
-						u[I(i,j)] = (float) ((1 - w)*u[I(i,j)] + w*(u_vR + u_wR)) ;
-						v[I(i,j)] = (float) ((1 - w)*v[I(i,j)] + w*(v_vR+ v_wR));
+						u[I(i,j)] = (float) ((1 - w)*u[I(i,j)] + w*(u_UR)) ;
+						v[I(i,j)] = (float) ((1 - w)*v[I(i,j)] + w*(v_UR));
 					}
-										
-					rb.x.x = (int)(rb.x.x + Constants.dt*u[I((int)rb.x.x, (int)rb.x.y)]);
-					rb.x.y = (int)(rb.x.y + Constants.dt*v[I((int)rb.x.x, (int)rb.x.y)]);
 				}
-			}	
+			}
+			
+			rb.x.x = rb.x.x + dt*rb.v.x;
+			rb.x.y = rb.x.y + dt*rb.v.y;
+			rb.theta += dt*rb.omega;
+			
+			System.out.println(rb.x);
+			System.out.println(rb.theta);
 		}
-		
-	
-		
 	}	
 	
 	public double[] findVelS(int i, int j, float[] u, float[] v){
@@ -410,10 +405,10 @@ public class FluidSolver
 		double right_Y = (v[I(i,j)] + v[I(i+1, j)])/2.0;
 		double left_X = (u[I(i,j)] + u[I(i-1, j)])/2.0;
 		double left_Y = (v[I(i,j)] + v[I(i-1, j)])/2.0;
-		double up_X = (u[I(i,j)] + u[I(i, j-1)])/2.0;
-		double up_Y = (v[I(i,j)] + v[I(i, j-1)])/2.0;
-		double down_X = (u[I(i,j)] + u[I(i, j+1)])/2.0;
-		double down_Y = (v[I(i,j)] + v[I(i, j+1)])/2.0;
+		double down_X = (u[I(i,j)] + u[I(i, j-1)])/2.0;
+		double down_Y = (v[I(i,j)] + v[I(i, j-1)])/2.0;
+		double up_X = (u[I(i,j)] + u[I(i, j+1)])/2.0;
+		double up_Y = (v[I(i,j)] + v[I(i, j+1)])/2.0;
 				
 		result[0] = u[I(i,j)]*(right_X-left_X) + v[I(i,j)]*(right_Y-left_Y);
 		result[1] = v[I(i,j)]*(up_X-down_X) + v[I(i,j)]*(up_Y-down_Y);		

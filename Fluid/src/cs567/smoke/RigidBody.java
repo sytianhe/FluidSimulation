@@ -14,17 +14,21 @@ public class RigidBody
 	/** Angular velocity (init=0) */
 	double   omega = 0;
 	
+	/** Angular position */
+	double 	 theta = 0;
+	
 	/** Density */
 	double   density = 0;
 	
 	/** Mass */
 	double   mass = 0;
 	
-	public RigidBody (Point2d centerMass, Vector2d LinVel, double AngVel, double d){
+	public RigidBody (Point2d centerMass, Vector2d LinVel, double theta, double AngVel, double d){
 		x = centerMass;
 		v = LinVel;
 		omega = AngVel;
 		density = d;
+		this.theta = theta;
 	}
 	
 	/** Return the w ratio for cell (i,j) */
