@@ -259,14 +259,14 @@ public class FluidSolver
 
 			addSource(u, uOld);
 			addSource(v, vOld);
-			//add(fx,uOld);
-			//add(fy,vOld);
+			add(fx,uOld);
+			add(fy,vOld);
 			
 
 			// DAMP MOMENTUM:
 			for(int ij=0; ij<size; ij++) {
-				//u[ij] -= Constants.V_d * dt * u[ij];
-				//v[ij] -= Constants.V_d * dt * v[ij];
+				u[ij] -= Constants.V_d * dt * u[ij];
+				v[ij] -= Constants.V_d * dt * v[ij];
 				fx[ij] -= Constants.V_d * u[ij];
 				fy[ij] -= Constants.V_d * v[ij];
 			}
@@ -277,13 +277,13 @@ public class FluidSolver
 
 		addSource(u, uOld);
 		addSource(v, vOld);
-		//add(fx,uOld);
-		//add(fy,vOld);
+		add(fx,uOld);
+		add(fy,vOld);
 
 		// add in buoyancy force
 		buoyancy(vOld, Constants.BUOYANCY);
 		addSource(v, vOld);
-		//add(fy,vOld);
+		add(fy,vOld);
 		// swapping arrays for economical mem use
 		// and calculating diffusion in velocity.
 		if(Constants.VISCOSITY > 0) {
@@ -336,11 +336,7 @@ public class FluidSolver
 
 
 		for (RigidBody rb: RB){
-			
-			rb.x.x += dt*rb.v.x;
-			rb.x.y += dt*rb.v.y;
-			rb.theta += dt*rb.omega;
-			
+						
 			rb.v.set(0.0,0.0);
 			rb.omega = 0;
 			for (int i = 1; i <= n; i++)
@@ -375,6 +371,7 @@ public class FluidSolver
 						// updating w
 						Vector2d r = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y);  //seperation between cell and x_cm
 						rb.omega += rb.density * (r.x*v[I(i,j)] - r.y*u[I(i,j)] ) * w  ;
+
 					}
 				}
 			}
@@ -383,6 +380,7 @@ public class FluidSolver
 			rb.omega /= rb.momentOfIntertia;
 			System.out.println(rb.v);
 			System.out.println(rb.omega);
+
 
 			for (int i = 1; i <= n; i++)
 			{
@@ -401,10 +399,10 @@ public class FluidSolver
 				}
 			}
 			
+			rb.x.x += dt*rb.v.x;
+			rb.x.y += dt*rb.v.y;
+			rb.theta += dt*rb.omega;
 
-			
-			System.out.println(rb.x);
-			System.out.println(rb.theta);
 		}
 	}	
 	
