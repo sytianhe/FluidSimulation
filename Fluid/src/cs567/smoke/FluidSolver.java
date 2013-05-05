@@ -360,7 +360,7 @@ public class FluidSolver
 						rb.v.y += v[I(i,j)]*w;
 
 						// updating w
-						Vector2d r_i = new Vector2d(i+0.5 - rb.x.x, j+0.5- rb.x.y);
+						Vector2d r_i = new Vector2d(i + 0.5 - rb.x.x, j + 0.5- rb.x.y);
 						rb.omega += r_i.x*u[I(i,j)] - r_i.y*v[I(i,j)];
 						
 						counter = counter + w;
@@ -369,6 +369,7 @@ public class FluidSolver
 			}
 			
 			rb.v.scale(1.0/counter);
+//			System.out.println(rb.v);
 			rb.omega *= (1.0/counter);
 			
 			for (int i = 1; i <= n; i++)
@@ -391,9 +392,9 @@ public class FluidSolver
 			rb.x.x = rb.x.x + dt*rb.v.x;
 			rb.x.y = rb.x.y + dt*rb.v.y;
 			rb.theta += dt*rb.omega;
-			
-			System.out.println(rb.x);
-			System.out.println(rb.theta);
+
+//			System.out.println(rb.x);
+//			System.out.println(rb.theta);
 		}
 	}	
 	
