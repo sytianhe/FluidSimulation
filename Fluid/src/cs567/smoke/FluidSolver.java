@@ -374,12 +374,12 @@ public class FluidSolver
 						double relDensity = (rb.density - Constants.FLUID_DENSITY);
 
 						// velocity term (u dot DEL)u
-						double uS =  -relDensity * ((u[i]-uPrev[i])/Constants.dt  + advectionTermU[I(i,j)] - fx[I(i,j)] );
-						double vS =  -relDensity * ((v[i]-vPrev[i])/Constants.dt  + advectionTermV[I(i,j)] - fy[I(i,j)] );
+						double uS =  -relDensity * ((u[I(i, j)]-uPrev[I(i,j)])/Constants.dt  + advectionTermU[I(i,j)] - fx[I(i,j)] );
+						double vS =  -relDensity * ((v[I(i, j)]-vPrev[I(i,j)])/Constants.dt  + advectionTermV[I(i,j)] - fy[I(i,j)] );
 
 						//update u and v using S
-						u[I(i,j)] += (float) (w * Constants.dt/rb.density * (uS + rb.density*rbAcceleration.x ));
-						v[I(i,j)] += (float) (w * Constants.dt/rb.density * (vS + rb.density*rbAcceleration.y ));
+						u[I(i,j)] += (float) (w * Constants.dt/rb.density * (uS));// + rb.density*rbAcceleration.x ));
+						v[I(i,j)] += (float) (w * Constants.dt/rb.density * (vS));// + rb.density*rbAcceleration.y ));
 
 						
 						// CALCULATING u_R USING EQUATION (23) FROM THE CARLSON PAPER

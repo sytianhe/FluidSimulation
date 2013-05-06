@@ -85,7 +85,7 @@ public class Smoke implements GLEventListener
 
 		control = new SmokeControlForces();
 		loadKeyframes(imageKeyframes);
-		//control.setKeyframe(keyframes[0]);
+		control.setKeyframe(keyframes[0]);
 		fs.setSmokeControl(control);
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
 
