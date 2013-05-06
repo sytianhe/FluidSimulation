@@ -4,13 +4,14 @@ import javax.media.opengl.GL2;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+
 public class RigidCircle extends RigidBody
 {
 	/** Radius */
 	double 	 radius;
 	
-	public RigidCircle(Point2d centerMass, Vector2d LinVel,double theta, double AngVel, double d, int r) {
-		super(centerMass, LinVel,theta, AngVel, d);
+	public RigidCircle(Point2d centerOfMass, Vector2d LinVel,double theta, double AngVel, double d, int r) {
+		super(centerOfMass, LinVel,theta, AngVel, d);
 		radius =r;
 		mass = Math.PI*r*r*d;
 		momentOfIntertia = mass * r * r / 2;
@@ -20,7 +21,7 @@ public class RigidCircle extends RigidBody
 	/** Return the w ratio for cell (i,j) */
 	public double wRatio (int row, int column){
 		
-		int numSample = 3;
+		int numSample = 4;
 		int counter = 0;
 		
 		for (int i=0; i<numSample; i++){
@@ -34,6 +35,24 @@ public class RigidCircle extends RigidBody
 		}
 		
 		return counter * 1.0/(numSample*numSample);
+	}
+	
+	@Override
+	public void applyConstraintForces() {
+		/// APPLY PENALTY FORCE IF IN CONTACT:
+		double penDepth = 0.1 - (x.y-radius);
+		if(penDepth > 0) {//overlap
+			/// PENALTY CONTACT FORCE:
+			double k     = Constants.CONTACT_STIFFNESS * mass;
+			double f =  k * penDepth;
+
+			/// DAMPING: 
+			double fDamp = + 0.004 * k * (v.y);
+			
+			force.y+= f;
+
+
+		}
 	}
 	
 	@Override

@@ -77,9 +77,7 @@ public class Smoke implements GLEventListener
 	 * 
 	 * @param imageKeyframes Image keyframes to use as smoke targets.
 	 */
-	Smoke(String[] imageKeyframes)
-			throws IOException
-			{
+	Smoke(String[] imageKeyframes) throws IOException {
 		if(imageKeyframes==null)      throw new NullPointerException("imageKeyframes was null");
 		if(imageKeyframes.length < 1) throw new NullPointerException("No image keyframes");
 
@@ -91,23 +89,14 @@ public class Smoke implements GLEventListener
 		fs.setSmokeControl(control);
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
 
-		RigidCircle rb = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 10, 10);
-		rbs = new ArrayList<RigidBody>();
-		rbs.add(rb);
-		fs.addRigidBodies(rbs);
+		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 10, 5);
+//		RigidCircle rb2 = new RigidCircle(new Point2d(40,70), new Vector2d(0.0,0.0), 0, 0, 10, 5);
 
-		/// INIT: RANDOM DENSITY:
-		if(false){
-			float[] d = fs.getDensity();
-			for(int i=1; i<=n; i++) {
-				for(int j=1; j<=n; j++) {
-					if(Math.random() > 0.9) {
-						d[fs.I(i,j)] = 1.f;
-					}
-				}
-			}
-		}
-			}
+		rbs = new ArrayList<RigidBody>();
+		rbs.add(rb1);
+//		rbs.add(rb2);
+		fs.addRigidBodies(rbs);	
+	}
 
 	/** Loads/Constructs "keyframes" */
 	private void loadKeyframes(String[] imageFilenames) throws IOException

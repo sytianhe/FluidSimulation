@@ -12,7 +12,7 @@ public class Constants
 {
     /** Time-step size. Note that explicitly integrated smoke-control
      * forcing/density terms can impose step-size restrictions. (default: 0.005)*/
-    public static final float dt = 0.03f;/// <-- MAY NEED TO REDUCE
+    public static final float dt = 0.01f;/// <-- MAY NEED TO REDUCE
 
     /** Resolution of N-by-N computational grid. */
     public static final int N = 100;
@@ -23,6 +23,8 @@ public class Constants
     /** Number of cells in computational domain, and size of
      * grid-based float[] arrays indexed by I(i,j). */
     public static final int size = N*N;/// <-- DO NOT CHANGE
+
+	public static int CONTACT_STIFFNESS = 100;
 
     /** Array index function. */
     public static final int I(int i, int j) { return i + N*j; }
