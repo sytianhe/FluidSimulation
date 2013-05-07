@@ -55,14 +55,26 @@ public class RigidCircle extends RigidBody
 			double fDamp = + 0.004 * k * (v.y);
 			
 			force.y+= f;
-
-
 		}
 	}
 	
 	@Override
 	/**  Display disk  */
-	public void display(GL2 gl){
+	public synchronized void display(GL2 gl){
+		/// SETUP TRANSFORM: 
+		gl.glPushMatrix();
+		{
+			applyGLTransform(gl);
+
+			{///DISPLAY:
+				draw (gl);
+			}
+		}
+		gl.glPopMatrix();
+	}
+	
+	public void draw(GL2 gl){
+		// loading texture
     	if(texture == null){
     		try {
     			texture = new Texture2D(gl, "images/yinYang.gif");
@@ -75,8 +87,6 @@ public class RigidCircle extends RigidBody
 
 		texture.use();
 
-		float cx = (float) (this.x.x/Constants.N);
-		float cy = (float) (this.x.y/Constants.N);
 		float r = (float) (radius/Constants.N);
 		gl.glLineWidth(3.0f);
 		gl.glBegin(GL2.GL_POLYGON);
@@ -84,7 +94,7 @@ public class RigidCircle extends RigidBody
 		for (int i=0; i<intervals; i++)
 		{
 			double degInRad = ((double)i) * 2.0 * Math.PI / ((double)intervals);
-			Point2d pos = new Point2d(cx + Math.cos(degInRad+theta)*r, cy + Math.sin(degInRad+theta)*r);
+			Point2d pos = new Point2d(Math.cos(degInRad+theta)*r, Math.sin(degInRad+theta)*r);
 			gl.glVertex2d(pos.x, pos.y);
 			gl.glTexCoord2d(0.5 + Math.cos(degInRad)*0.5, 0.5 + Math.sin(degInRad)*0.5);
 			gl.glColor3d(1.0, 215.0/256.0, 0.0);

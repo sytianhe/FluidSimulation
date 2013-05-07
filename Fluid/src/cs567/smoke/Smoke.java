@@ -89,7 +89,7 @@ public class Smoke implements GLEventListener
 		fs.setSmokeControl(control);
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
 
-//		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1, 5);
+//		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
 		RigidEllipse rb2 = new RigidEllipse(new Point2d(40,70), new Vector2d(0.0,0.0), 0, 0, 10, 6, 3);
 
 		rbs = new ArrayList<RigidBody>();

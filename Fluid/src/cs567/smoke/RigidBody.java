@@ -106,7 +106,7 @@ public class RigidBody
 	}
 	
 	
-	public void display(GL2 gl){
+	public synchronized void display(GL2 gl){
 		
 	}
 
@@ -149,6 +149,14 @@ public class RigidBody
 	public void applyConstraintForces() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	/** Applies the body-to-world (B2W) transformation. */
+	protected void applyGLTransform(GL2 gl)
+	{
+		gl.glTranslated(x.x/Constants.N, x.y/Constants.N, 0);
+		double angleInDegrees = 180./Math.PI * theta;
+		gl.glRotated(angleInDegrees, 0, 0, 1);
 	}
 
 }

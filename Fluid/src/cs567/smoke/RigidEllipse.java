@@ -41,6 +41,7 @@ public class RigidEllipse extends RigidBody
 				double xCoord = row + (i+0.5)/numSample - x.x;
 				double yCoord = column + (j+0.5)/numSample - x.y;
 				//Transform to ellipse coordinate
+				// subject to check
 				double xCoordPrime = Math.cos(theta)*xCoord - Math.sin(theta)*yCoord;
 				double yCoordPrime = Math.sin(theta)*xCoord + Math.cos(theta)*yCoord;
 				
@@ -73,7 +74,20 @@ public class RigidEllipse extends RigidBody
 	
 	@Override
 	/**  Display disk  */
-	public void display(GL2 gl){
+	public synchronized void display(GL2 gl){
+		/// SETUP TRANSFORM: 
+		gl.glPushMatrix();
+		{
+			applyGLTransform(gl);
+
+			{///DISPLAY:
+				draw (gl);
+			}
+		}
+		gl.glPopMatrix();
+	}
+	
+	public void draw(GL2 gl){
     	if(texture == null){
     		try {
     			texture = new Texture2D(gl, "images/yinYang.gif");
@@ -86,8 +100,8 @@ public class RigidEllipse extends RigidBody
 
 		texture.use();
 
-		float cx = (float) (this.x.x/Constants.N);
-		float cy = (float) (this.x.y/Constants.N);
+		//float cx = (float) (this.x.x/Constants.N);
+		//float cy = (float) (this.x.y/Constants.N);
 		gl.glLineWidth(3.0f);
 		gl.glBegin(GL2.GL_POLYGON);
 		int intervals = 100;
@@ -96,10 +110,10 @@ public class RigidEllipse extends RigidBody
 			// NOT RIGHT
 			double degInRad = ((double)i) * 2.0 * Math.PI / ((double)intervals);
 			float r = (float) this.getRadius(degInRad)/Constants.N;
-			Point2d pos = new Point2d(Math.cos(degInRad)*r, Math.sin(degInRad)*r);
-			double xCoordPrime = Math.cos(theta)*pos.x - Math.sin(theta)*pos.y;
-			double yCoordPrime = Math.sin(theta)*pos.y + Math.cos(theta)*pos.y;
-			gl.glVertex2d(cx + xCoordPrime, cy + yCoordPrime);
+			//Point2d pos = new Point2d(Math.cos(degInRad)*r, Math.sin(degInRad)*r);
+			//double xCoordPrime = Math.cos(theta)*pos.x - Math.sin(theta)*pos.y;
+			//double yCoordPrime = Math.sin(theta)*pos.y + Math.cos(theta)*pos.y;
+			gl.glVertex2d(Math.cos(degInRad)*r, Math.sin(degInRad)*r);
 			gl.glTexCoord2d(0.5 + Math.cos(degInRad)*0.5, 0.5 + Math.sin(degInRad)*0.5);
 			gl.glColor3d(1.0, 215.0/256.0, 0.0);
 		}
