@@ -272,10 +272,6 @@ public class FluidSolver
 
 		}
 		
-
-		
-
-
 		// add in vorticity confinement force
 		vorticityConfinement(uOld, vOld);
 

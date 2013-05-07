@@ -1,14 +1,19 @@
 package cs567.smoke;
 
+import java.io.IOException;
+
 import javax.media.opengl.GL2;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
+
+import cs567.framework.Texture2D;
 
 
 public class RigidCircle extends RigidBody
 {
 	/** Radius */
 	double 	 radius;
+	private Texture2D texture;
 	
 	public RigidCircle(Point2d centerOfMass, Vector2d LinVel,double theta, double AngVel, double d, int r) {
 		super(centerOfMass, LinVel,theta, AngVel, d);
@@ -58,21 +63,34 @@ public class RigidCircle extends RigidBody
 	@Override
 	/**  Display disk  */
 	public void display(GL2 gl){
-		
+    	if(texture == null){
+    		try {
+    			texture = new Texture2D(gl, "images/yinYang.gif");
+    		}
+    		catch (IOException e) {
+    			System.out.print("Cannot load texture: ");
+    			System.out.println(e.getMessage());
+    		}
+    	}
+
+		texture.use();
+
 		float cx = (float) (this.x.x/Constants.N);
 		float cy = (float) (this.x.y/Constants.N);
 		float r = (float) (radius/Constants.N);
 		gl.glLineWidth(3.0f);
-		gl.glBegin(GL2.GL_LINE_LOOP);
+		gl.glBegin(GL2.GL_POLYGON);
 		int intervals = 100;
 		for (int i=0; i<intervals; i++)
 		{
 			double degInRad = ((double)i) * 2.0 * Math.PI / ((double)intervals);
-			gl.glVertex2d(cx + Math.cos(degInRad)*r, cy + Math.sin(degInRad)*r);
+			Point2d pos = new Point2d(cx + Math.cos(degInRad+theta)*r, cy + Math.sin(degInRad+theta)*r);
+			gl.glVertex2d(pos.x, pos.y);
+			gl.glTexCoord2d(0.5 + Math.cos(degInRad)*0.4, 0.5 + Math.sin(degInRad)*0.4);
 			gl.glColor3d(1.0, 215.0/256.0, 0.0);
 		}
 
 		gl.glEnd();
-
+		texture.unuse();
 	}
 }
