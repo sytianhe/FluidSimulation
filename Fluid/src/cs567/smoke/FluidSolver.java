@@ -262,18 +262,19 @@ public class FluidSolver
 			add(fx,uOld);
 			add(fy,vOld);
 			
+			// DAMP MOMENTUM:
+			for(int ij=0; ij<size; ij++) {
+				u[ij] -= Constants.V_d * dt * u[ij];
+				v[ij] -= Constants.V_d * dt * v[ij] ;
+				fx[ij] -= Constants.V_d * u[ij];
+				fy[ij] -= Constants.V_d * v[ij]  ;
+			}
 
 		}
 		
 
 		
-		// DAMP MOMENTUM:
-		for(int ij=0; ij<size; ij++) {
-			u[ij] -= Constants.V_d * dt * u[ij];
-			v[ij] -= Constants.V_d * dt * v[ij] ;
-			fx[ij] -= Constants.V_d * u[ij];
-			fy[ij] -= Constants.V_d * v[ij]  ;
-		}
+
 
 		// add in vorticity confinement force
 		vorticityConfinement(uOld, vOld);
@@ -284,9 +285,9 @@ public class FluidSolver
 		add(fy,vOld);
 
 		// add in buoyancy force
-		//buoyancy(vOld, Constants.BUOYANCY);
-		//addSource(v, vOld);
-		//add(fy,vOld);
+		buoyancy(vOld, Constants.BUOYANCY);
+		addSource(v, vOld);
+		add(fy,vOld);
 		
 		// swapping arrays for economical mem use
 		// and calculating diffusion in velocity.
@@ -316,10 +317,13 @@ public class FluidSolver
 		
 		// MAKE UPDATE FOR THE RIGID BODIES CELLS
 		// APPLY RIGID BODY FORCES
-		for(RigidBody rb : RB) rb.applyWrenchW(new Vector2d(0,-10*rb.mass), 0);  //Add gravity force to each rigid body
+		for(RigidBody rb : RB){
+			//Effective gravitational force in dense fluid for fully submerged rigid body.
+			rb.applyWrenchW(new Vector2d(0,-10* rb.mass * (1 - Constants.FLUID_DENSITY / rb.density) ), 0); 
+		}
 		
 		// ADD CONSTRAINT FORCES
-		for(RigidBody rb : RB) rb.applyConstraintForces();  //Add gravity force to each rigid body
+		for(RigidBody rb : RB) rb.applyConstraintForces();  //just make sure the rigid body doesn't fall through the floor.
 
 		rigidSolver(u, v, uPrev, vPrev);
 
@@ -378,8 +382,8 @@ public class FluidSolver
 						double vS =  -relDensity * ((v[I(i, j)]-vPrev[I(i,j)])/Constants.dt  + advectionTermV[I(i,j)] - fy[I(i,j)] );
 
 						//update u and v using S
-						u[I(i,j)] += (float) (w * Constants.dt/rb.density * (uS));// + rb.density*rbAcceleration.x ));
-						v[I(i,j)] += (float) (w * Constants.dt/rb.density * (vS));// + rb.density*rbAcceleration.y ));
+						u[I(i,j)] += (float) (w * Constants.dt/rb.density * (uS + rb.density*rbAcceleration.x ));
+						v[I(i,j)] += (float) (w * Constants.dt/rb.density * (vS + rb.density*rbAcceleration.y ));
 
 						
 						// CALCULATING u_R USING EQUATION (23) FROM THE CARLSON PAPER
