@@ -89,12 +89,12 @@ public class Smoke implements GLEventListener
 		fs.setSmokeControl(control);
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
 
-		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 100000, 5);
-//		RigidCircle rb2 = new RigidCircle(new Point2d(40,70), new Vector2d(0.0,0.0), 0, 0, 10, 5);
+//		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1, 5);
+		RigidEllipse rb2 = new RigidEllipse(new Point2d(40,70), new Vector2d(0.0,0.0), 0, 0, 10, 6, 3);
 
 		rbs = new ArrayList<RigidBody>();
-		rbs.add(rb1);
-//		rbs.add(rb2);
+//		rbs.add(rb1);
+		rbs.add(rb2);
 		fs.addRigidBodies(rbs);	
 	}
 
@@ -521,7 +521,7 @@ public class Smoke implements GLEventListener
 					"images/N.png",
 					"images/E.png",
 					"images/L.png",
-					"images/L.png",
+					"images/yinYang.gif",
 			"images/cornellLogo.png"};
 			if(args.length > 0)  imageKeyframes = args;
 			System.out.println("Images: "+(Arrays.asList(imageKeyframes)));
