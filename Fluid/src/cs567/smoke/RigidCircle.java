@@ -86,7 +86,7 @@ public class RigidCircle extends RigidBody
 			double degInRad = ((double)i) * 2.0 * Math.PI / ((double)intervals);
 			Point2d pos = new Point2d(cx + Math.cos(degInRad+theta)*r, cy + Math.sin(degInRad+theta)*r);
 			gl.glVertex2d(pos.x, pos.y);
-			gl.glTexCoord2d(0.5 + Math.cos(degInRad)*0.4, 0.5 + Math.sin(degInRad)*0.4);
+			gl.glTexCoord2d(0.5 + Math.cos(degInRad)*0.5, 0.5 + Math.sin(degInRad)*0.5);
 			gl.glColor3d(1.0, 215.0/256.0, 0.0);
 		}
 
