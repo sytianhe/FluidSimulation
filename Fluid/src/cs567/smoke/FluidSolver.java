@@ -378,8 +378,8 @@ public class FluidSolver
 						double vS =  -relDensity * ((v[I(i, j)]-vPrev[I(i,j)])/Constants.dt  + advectionTermV[I(i,j)] - fy[I(i,j)] );
 
 						//update u and v using S
-						u[I(i,j)] += (float) (w * Constants.dt/rb.density * (uS));// + rb.density*rbAcceleration.x ));
-						v[I(i,j)] += (float) (w * Constants.dt/rb.density * (vS));// + rb.density*rbAcceleration.y ));
+						u[I(i,j)] += (float) (w * Constants.dt/rb.density * (uS + rb.density*rbAcceleration.x ));
+						v[I(i,j)] += (float) (w * Constants.dt/rb.density * (vS + rb.density*rbAcceleration.y ));
 
 						
 						// CALCULATING u_R USING EQUATION (23) FROM THE CARLSON PAPER
