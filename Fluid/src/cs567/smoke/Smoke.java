@@ -94,6 +94,7 @@ public class Smoke implements GLEventListener
 //		RigidDisk rb2 = new RigidDisk(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
 		RigidEllipse2 rb2 = new RigidEllipse2(new Point2d(10,90), new Vector2d(0.0,0.0), -1.3, 0, 5, 8, 2);
 
+
 		rbs = new ArrayList<RigidBody>();
 //		rbs.add(rb1);
 		rbs.add(rb2);

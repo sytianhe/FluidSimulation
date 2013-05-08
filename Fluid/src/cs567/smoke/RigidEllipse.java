@@ -57,7 +57,7 @@ public class RigidEllipse extends RigidBody
 	@Override
 	public void applyConstraintForces() {
 		/// APPLY PENALTY FORCE IF IN CONTACT:
-		double penDepth = 0.1 - (x.y-this.getRadius(-Math.PI+theta)); // subject to check
+		double penDepth = 0.1 - (x.y-this.getRadius(-Math.PI-theta)); // subject to check
 		if(penDepth > 0) {//overlap
 			/// PENALTY CONTACT FORCE:
 			double k     = Constants.CONTACT_STIFFNESS * mass;
@@ -67,8 +67,6 @@ public class RigidEllipse extends RigidBody
 			double fDamp = + 0.004 * k * (v.y);
 			
 			force.y+= f;
-
-
 		}
 	}
 	

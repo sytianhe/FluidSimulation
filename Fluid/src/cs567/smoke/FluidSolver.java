@@ -597,9 +597,7 @@ public class FluidSolver
 		{
 			for (int j = 1; j <= n; j++)
 			{
-				div[I(i, j)] = (x[I(i+1, j)] - x[I(i-1, j)]
-						+ y[I(i, j+1)] - y[I(i, j-1)])
-						* - 0.5f / n;
+				div[I(i, j)] = (x[I(i+1, j)] - x[I(i-1, j)] + y[I(i, j+1)] - y[I(i, j-1)]) * - 0.5f / n;
 				p[I(i, j)] = 0;
 			}
 		}
@@ -607,7 +605,7 @@ public class FluidSolver
 		setBoundary(0, div);
 		setBoundary(0, p);
 
-		linearSolver(0, p, div, 1, 4);
+		PCGSolver(0, p, div);
 
 		for (int i = 1; i <= n; i++)
 		{
@@ -643,9 +641,7 @@ public class FluidSolver
 			{
 				for (int j = 1; j <= n; j++)
 				{
-					float est  = (a * ( x[I(i-1, j)] + x[I(i+1, j)]
-							+   x[I(i, j-1)] + x[I(i, j+1)])
-							+  x0[I(i, j)]) / c;
+					float est  = ( a * ( x[I(i-1, j)] + x[I(i+1, j)] + x[I(i, j-1)] + x[I(i, j+1)]) +  x0[I(i, j)]) / c;
 					float old  = x[I(i,j)];
 					x[I(i,j)]  = omegaSOR*est + oneMinus_omegaSOR*old;
 				}
@@ -653,7 +649,87 @@ public class FluidSolver
 			setBoundary(b, x);
 		}
 	}
+	
+	/** 
+	 * PCG SOLVER!
+	 */
+	void PCGSolver(int b, float[] x, float[] x0)
+	{
+		int nIterations = Constants.N_GAUSS_SEIDEL_ITERATIONS;
+		
+		// finding r = b   -   A*x
+		//             |       | |
+		//             x0        0 
+		float []res = new float[size];
+		float [] p  = new float[size];
+		
+		for (int i = 1; i <= n; i++)
+		{
+			for (int j = 1; j <= n; j++)
+			{
+				res[I(i,j)] = p[I(i,j)] = x0[I(i, j)];
+				System.out.println(res[I(i,j)]);
+			}
+		}
+		//setBoundary(b, res);
+		//setBoundary(b, p); 
+		
+		float rsold = dotProd(res, res);
+//		System.out.println(rsold);
+		
+		for (int k = 0; k < nIterations; k++){
+			float []Ap = new float[size];
+			for (int i = 1; i <= n; i++)
+			{
+				for (int j = 1; j <= n; j++)
+				{
+					Ap[I(i,j)] = centerDiff(p, i, j);
+				}
+			}
+			//setBoundary(b, Ap);
+			
+			float alpha = rsold/dotProd(p, Ap);
+			
+			for (int i = 1; i <= n; i++)
+			{
+				for (int j = 1; j <= n; j++)
+				{
+					x[I(i,j)]   += alpha*Ap[I(i,j)];
+					res[I(i,j)] -= alpha*Ap[I(i,j)];
+				}
+			}
+			//setBoundary(b, x);
+			
+			float rsnew = dotProd(res,res);
+			if (rsnew < 0.000001 ){
+				break;
+			}
+			
+			for (int i = 1; i <= n; i++)
+			{
+				for (int j = 1; j <= n; j++)
+				{
+					p[I(i,j)] = res[I(i,j)] + rsnew/rsold*p[I(i,j)];
+				}
+			}
+			setBoundary(b, p);
+			rsold = rsnew;
+		}
+	}
 
+
+	private float centerDiff(float[] p, int i, int j) {
+		
+		return - 4*p[I(i,j)] + (p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j +1)]);
+	}
+	
+	private float dotProd(float[]p, float[]q){
+		float temp = 0f;
+		for (int i = 0; i<size; i++){
+			temp += p[i]*q[i];
+		}
+		return temp;
+	}
 
 	/** Specifies simple boundary conditions. */
 	private void setBoundary(int b, float[] x)
