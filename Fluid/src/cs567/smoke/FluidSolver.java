@@ -605,7 +605,8 @@ public class FluidSolver
 		setBoundary(0, div);
 		setBoundary(0, p);
 
-		PCGSolver(0, p, div);
+		linearSolver(0, p, div, 1, 4);
+		//PCGSolver(0, p, div);
 
 		for (int i = 1; i <= n; i++)
 		{
