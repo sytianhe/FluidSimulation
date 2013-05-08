@@ -21,7 +21,7 @@ public class RigidEllipse extends RigidBody
 		majorRadius = r1;
 		minorRadius = r2;
 		mass = Math.PI*r1*r2*d;
-		momentOfIntertia = mass * r1 * r2 / 2;
+		momentOfInertia = mass * r1 * r2 / 2;
 	}
 	
 	/** Get the radius (relative to the center) of the ellipse at current angle */

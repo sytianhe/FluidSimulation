@@ -90,7 +90,9 @@ public class Smoke implements GLEventListener
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
 
 //		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
-		RigidEllipse rb2 = new RigidEllipse(new Point2d(40,70), new Vector2d(0.0,0.0), 0, 0, 10, 6, 3);
+//		RigidEllipse rb2 = new RigidEllipse(new Point2d(40,70), new Vector2d(0.0,0.0), 0, 0, 10, 6, 3);
+//		RigidDisk rb2 = new RigidDisk(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
+		RigidEllipse2 rb2 = new RigidEllipse2(new Point2d(10,90), new Vector2d(0.0,0.0), -1.3, 0, 5, 8, 2);
 
 		rbs = new ArrayList<RigidBody>();
 //		rbs.add(rb1);
@@ -299,14 +301,15 @@ public class Smoke implements GLEventListener
 			/// DON'T DRAW 0, n+1 border:
 			for(int i=1; i<=n; i++) {
 				gl.glBegin(gl.GL_LINES);
-				gl.glLineWidth(0.1f);
+				gl.glLineWidth(0.05f);
 				gl.glColor3f(1.0f, 0.0f, 0.0f);
-				float x = (i - 0.5f)/(float)n;
+				float x = (i + 0.5f)/(float)n;
 
 				for(int j=1; j<=n; j++) {
-					float y = (j - 0.5f)/(float)n;
+					float y = (j + 0.5f)/(float)n;
 					Vector2f temp = new Vector2f(fs.u[Constants.I(i,j)], fs.v[Constants.I(i,j)]);
 					//System.out.println(temp);
+					temp.scale(0.1f);
 					gl.glVertex2f(x, y);
 					float u = temp.x;
 					float v = temp.y;

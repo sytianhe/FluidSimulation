@@ -19,7 +19,7 @@ public class RigidCircle extends RigidBody
 		super(centerOfMass, LinVel,theta, AngVel, d);
 		radius =r;
 		mass = Math.PI*r*r*d;
-		momentOfIntertia = mass * r * r / 2;
+		momentOfInertia = mass * r * r / 2;
 	}
 
 	@Override

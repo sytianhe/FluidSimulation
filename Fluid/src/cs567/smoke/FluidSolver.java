@@ -261,16 +261,17 @@ public class FluidSolver
 			addSource(v, vOld);
 			add(fx,uOld);
 			add(fy,vOld);
-			
-			// DAMP MOMENTUM:
-			for(int ij=0; ij<size; ij++) {
-				u[ij] -= Constants.V_d * dt * u[ij];
-				v[ij] -= Constants.V_d * dt * v[ij] ;
-				fx[ij] -= Constants.V_d * u[ij];
-				fy[ij] -= Constants.V_d * v[ij]  ;
-			}
 
 		}
+		
+		
+//		// DAMP MOMENTUM:
+//		for(int ij=0; ij<size; ij++) {
+//			u[ij] -= Constants.V_d * dt * u[ij];
+//			v[ij] -= Constants.V_d * dt * v[ij] ;
+//			fx[ij] -= Constants.V_d * u[ij];
+//			fy[ij] -= Constants.V_d * v[ij]  ;
+//		}
 		
 		// add in vorticity confinement force
 		vorticityConfinement(uOld, vOld);
@@ -281,9 +282,9 @@ public class FluidSolver
 		add(fy,vOld);
 
 		// add in buoyancy force
-		buoyancy(vOld, Constants.BUOYANCY);
-		addSource(v, vOld);
-		add(fy,vOld);
+		//buoyancy(vOld, Constants.BUOYANCY);
+		//addSource(v, vOld);
+		//add(fy,vOld);
 		
 		// swapping arrays for economical mem use
 		// and calculating diffusion in velocity.
@@ -386,11 +387,9 @@ public class FluidSolver
 						// updating v
 						rb.v.x += rb.density * u[I(i,j)] * w; 
 						rb.v.y += rb.density * v[I(i,j)] * w;
-						//mass += rb.density * w ;
 
 						// updating w
 						rb.omega += rb.density * (r.x*v[I(i,j)] - r.y*u[I(i,j)] ) * w  ;
-						//momentOfInertia += rb.density * r.lengthSquared() * w;
 
 					}
 				}
