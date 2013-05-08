@@ -265,13 +265,13 @@ public class FluidSolver
 		}
 		
 		
-//		// DAMP MOMENTUM:
-//		for(int ij=0; ij<size; ij++) {
-//			u[ij] -= Constants.V_d * dt * u[ij];
-//			v[ij] -= Constants.V_d * dt * v[ij] ;
-//			fx[ij] -= Constants.V_d * u[ij];
-//			fy[ij] -= Constants.V_d * v[ij]  ;
-//		}
+		// DAMP MOMENTUM:
+		for(int ij=0; ij<size; ij++) {
+			u[ij] -= Constants.V_d * dt * u[ij];
+			v[ij] -= Constants.V_d * dt * v[ij] ;
+			fx[ij] -= Constants.V_d * u[ij];
+			fy[ij] -= Constants.V_d * v[ij]  ;
+		}
 		
 		// add in vorticity confinement force
 		vorticityConfinement(uOld, vOld);
@@ -605,8 +605,8 @@ public class FluidSolver
 		setBoundary(0, div);
 		setBoundary(0, p);
 
-		linearSolver(0, p, div, 1, 4);
-		//PCGSolver(0, p, div);
+		//linearSolver(0, p, div, 1, 4);
+		PCGSolver(0, p, div);
 
 		for (int i = 1; i <= n; i++)
 		{
@@ -661,7 +661,7 @@ public class FluidSolver
 		// finding r = b   -   A*x
 		//             |       | |
 		//             x0        0 
-		float []res = new float[size];
+		float []res = new float[size]; //residual
 		float [] p  = new float[size];
 		
 		for (int i = 1; i <= n; i++)
@@ -669,14 +669,13 @@ public class FluidSolver
 			for (int j = 1; j <= n; j++)
 			{
 				res[I(i,j)] = p[I(i,j)] = x0[I(i, j)];
-				System.out.println(res[I(i,j)]);
 			}
 		}
 		//setBoundary(b, res);
 		//setBoundary(b, p); 
 		
 		float rsold = dotProd(res, res);
-//		System.out.println(rsold);
+		System.out.println(rsold);
 		
 		for (int k = 0; k < nIterations; k++){
 			float []Ap = new float[size];
@@ -689,7 +688,8 @@ public class FluidSolver
 			}
 			//setBoundary(b, Ap);
 			
-			float alpha = rsold/dotProd(p, Ap);
+			float alpha = 0;
+			if (rsold>0) alpha = rsold/dotProd(p, Ap);
 			
 			for (int i = 1; i <= n; i++)
 			{
@@ -721,7 +721,7 @@ public class FluidSolver
 
 	private float centerDiff(float[] p, int i, int j) {
 		
-		return - 4*p[I(i,j)] + (p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j +1)]);
+		return  - 4f * p[I(i,j)] + (p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j - 1)]);
 	}
 	
 	private float dotProd(float[]p, float[]q){

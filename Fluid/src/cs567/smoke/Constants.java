@@ -31,7 +31,7 @@ public class Constants
 
     
     /** Iterations used in FluidSolver.linearSolver(). */
-    public static final int N_GAUSS_SEIDEL_ITERATIONS = N/3;
+    public static final int N_GAUSS_SEIDEL_ITERATIONS = N;
 
 
     /** Driving force amplitude, V_f (default: 2)  */
@@ -41,7 +41,7 @@ public class Constants
     public static final float V_g = 0.2f;
 
     /** Drag force amplitude, V_d (default: 0.5)  */
-    public static final float V_d = 0.5f;
+    public static final float V_d = 0.1f;
 
     /** Smoke diffusion coefficient (default: 0.0001). Nonzero values are needed (I
      * believe) to avoid instabilities during smoke control. */
