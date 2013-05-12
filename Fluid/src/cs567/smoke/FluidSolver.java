@@ -695,7 +695,7 @@ public class FluidSolver
 			{
 				for (int j = 1; j <= n; j++)
 				{
-					x[I(i,j)]   += alpha*Ap[I(i,j)];
+					x[I(i,j)]   += alpha*p[I(i,j)];
 					res[I(i,j)] -= alpha*Ap[I(i,j)];
 				}
 			}

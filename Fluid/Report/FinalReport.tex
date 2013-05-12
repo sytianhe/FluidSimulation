@@ -9,7 +9,9 @@
 %%% is identical in ``template.tex'' and ``template.annotated.tex.'')
 
 \documentclass[annual]{acmsiggraph}
-
+\usepackage{amsfonts}
+\usepackage{algorithm}
+\usepackage{algorithmic}
 \TOGonlineid{45678}
 \TOGvolume{0}
 \TOGnumber{0}
@@ -43,7 +45,76 @@ Wind dispersal of  seeds is an important mechanism for mobility in many plant sp
 
 
 \section{Technical Description}
+\subsection{Fluid (Smoke)}
 
+\subsection{Rigid Body Coupling}
+We applied the idea presented in \cite{carlson2004} to update the velocity for the rigid body. According to equation (17) in the paper, the forces that arises from the relative density can be expressed as 
+$$ \mathbf{S} = \rho_r \mathbf{A}_c + \mathbf{r}_i \times \rho_r \alpha_c - (\rho_r - \rho_f) [\frac{\mathbf{u}^* - \mathbf{u}^n}{\Delta t} + (\mathbf{u}^* \cdot \nabla )\mathbf{u}^* - \mathbf{f}]$$
+We decide to not add the collision forces into our system for this project, so our $\mathbf{S}$ term becomes
+$$ \mathbf{S}' = - (\rho_r - \rho_f) [\frac{\mathbf{u}^* - \mathbf{u}^n}{\Delta t} + (\mathbf{u}^* \cdot \nabla )\mathbf{u}^* - \mathbf{f}]$$
+where $\mathbf{u}^*$ is the velocity of the current iteration of fluid solving. $\mathbf{u}^n$ is the velocity of last iteration. $\rho_r$ is the density of the rigid body, $\rho_f$ is the density of the fluid. $\mathbf{f}$ is the external force.
+
+In order to compute the term $(\mathbf{u}^* \cdot \nabla )\mathbf{u}^*$, assume $\mathbf{u}^* = \binom{u}{v}$, then
+\begin{equation}
+\begin{split}
+(\mathbf{u}^* \cdot \nabla )\mathbf{u}^*& = (u \partial_u + v \partial_v)\mathbf{u}^* \\
+& = \binom {u \partial_u u + v \partial_v u}{ u \partial_u v+ v \partial_v v}
+\end{split}
+\end{equation}
+Then we applied the MAC grid to calculate $\partial_u u, \partial_u v, \partial_v u \mbox{ and } \partial_v v$.
+
+Using $\mathbf{S}$ we update $\mathbf{u}^*$ for a new velocity field,
+$$\hat{\mathbf{u}} = \mathbf{u}^* + \mathit{w}\frac{\Delta t}{\rho_r}\mathbf{S}$$
+where $\mathit{w}$ is the fraction of the cell that is part of solid. To obtain this $\mathit{w}$, we used the supersampling technique. 
+
+In order to maintain the rigidity, we need to obtain $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ for each rigid body. We calculate them by integrating $\hat{\mathbf{u}}$ inside a given rigid body $\mathbb{R}_i$ with the following equations:
+$$ M_i \hat{\mathbf{v}}_i = \int_{\mathbb{R}_i} \rho_i \hat{\mathbf{u}} dg_i$$
+$$ \mathbf{I}_i \hat{\omega}_i = \int_{\mathbb{R}_i} \mathbf{r}_i \times \rho_i \hat{\mathbf{u}} dg_i$$
+where, $dg_i$ is the column of the cell occupied by the solid (can be calculated by $\mathit{w}$).
+Then, we can find $\hat{\mathbf{u}}_R$ by
+$$ \hat{\mathbf{u}}_R = \cup_i (\hat{\mathbf{v}}_i + \hat{\omega}_i \times \mathbf{r}_i) $$
+and get our final velocity:
+$$\mathbf{u}^{n+1} = (1-\mathit{w})\hat{\mathbf{u}} + \mathit{w}\hat{\mathbf{u}}_R$$
+ 
+In our implementation, we go through each cell in the grid two times. The first time, we find out $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ by cumulating $\rho_i \hat{\mathbf{u}} dg_i$ and $\mathbf{r}_i \times \rho_i \hat{\mathbf{u}} dg_i$ at each cell. The second time, we use the calculated $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ to compute $ \hat{\mathbf{u}}_R $ and to update the new velocity $\mathbf{u}^{n+1}$ .
+
+\subsection{Stable Solver}
+To improve the performance of the fluid solver, we implemented the Pre-conditioner Conjugate Gradient (PCG) solver. The pseudo code is showed in algorithm $\ref{alg1}$.
+\begin{algorithm}
+\caption{Preconditioned Conjugate gradient algorithm }
+\label{alg1}
+\begin{algorithmic}
+\STATE \textbf{input} $x$, $A$, $b$, $M$, $Q$, $\delta$, $\varepsilon$
+\STATE $r\leftarrow b - Ax$
+\STATE solve $Qz = r$ for $z$
+\STATE $v \leftarrow z$
+\STATE $c \leftarrow \langle z, r \rangle$
+\FOR{ $k =1$ \textbf{to} $M$ do}
+	\IF {$\langle v, v \rangle^{1/2} \le \delta$}
+		\STATE exit loop
+	\ENDIF
+	\STATE $z \leftarrow Av$
+	\STATE $t \leftarrow c/\langle v, z \rangle$
+	\STATE $x \leftarrow x + tv$
+	\STATE $r \leftarrow r - tz$
+	\STATE solve $Qz = r$ for $z$
+	\STATE $d \leftarrow \langle z, r \rangle$
+	\IF {$d \le \varepsilon$}
+		\IF {$\langle r, r \rangle \le \varepsilon$}
+			\STATE exit loop
+		\ENDIF
+	\ENDIF
+	\STATE $ v \leftarrow z + (d/c)v $
+	\STATE $ c \leftarrow d$
+	\STATE \textbf{output} k, x, r
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Polarized Shape Rigid Body}
+To make our rigid body look more interesting, we implemented this polar parameterization shape. Given a function whose radius depends on angle, we can generate some different shapes. 
+
+Poler coordinates is convenient to find volume, moment of inertia and the coefficient $\mathit{w}$.
 
 \section{Goal}
 
