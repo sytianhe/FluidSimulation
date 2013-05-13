@@ -51,6 +51,11 @@ public class SeedDrop implements GLEventListener
 	
 	/** Count the number of samples per shape so far. */
 	int sampleCounter = 0;
+		
+	int N_SHAPE_PARAMETERS = 2;
+	
+	/** Store shape parameters. */
+	double[] ShapeParameters;
 	
 	/** Store average velocity per drop per shape. */
 	double[][] AvgVelocity;
@@ -134,6 +139,7 @@ public class SeedDrop implements GLEventListener
 	 */
 	SeedDrop(){
 		//Initialize data storage
+		ShapeParameters = new double[N_SHAPES*N_SHAPE_PARAMETERS];
 		AvgVelocity = new double[N_SHAPES][N_SAMPLES_PER_SHAPE];
 		TerminalVelocity = new double[N_SHAPES][N_SAMPLES_PER_SHAPE];
 		MaxDisplacment = new double[N_SHAPES][N_SAMPLES_PER_SHAPE];
@@ -161,10 +167,18 @@ public class SeedDrop implements GLEventListener
 				
 				sampleCounter = 0;
 
-				// GENERATE NEW SHAPE.
+				// GENERATE NEW SHAPE RANDOMELY.
 				// SHAPE SHOULD CONSERVE SOME QUANTITY?????
 				// eg volume, surface area, mass, etc 
-				rb = new RigidEllipse2(StartPosition, StartVelocity,0, 0, density,3 + Math.random(),3 +  Math.random());
+				
+				double a = 4f + 4f * Math.random(); //Major axis 
+				double b = 1f + 3f * Math.random(); //Minor axis
+				
+				ShapeParameters[2*shapeCounter] = a;
+				ShapeParameters[2*shapeCounter+1] = b;
+
+				
+				rb = new RigidEllipse2(StartPosition, StartVelocity, 0, 0, density, a , b);
 				fs.addRigidBody(rb);
 				
 				time = 0;
@@ -234,14 +248,19 @@ public class SeedDrop implements GLEventListener
 			try {
 				writer = new FileWriter(filename);
 
+				writer.write("SHAPECLASS " + RigidEllipse2.class.getName() + "\n");
 				writer.write("NSHAPES " + N_SHAPES + "\n");
 				writer.write("N_SAMPLES_PER_SHAPE " + N_SAMPLES_PER_SHAPE + "\n");
 				writer.write("DENSITY " + density + "\n");
+				writer.write("\n");
+				writer.write("i j majorAxis minorAxis AvgVel TermVel MaxDispX FinalDispX");
 				writer.write("\n");
 
 				for (int i =0; i< N_SHAPES; i++){
 					for (int j=0; j< N_SAMPLES_PER_SHAPE; j ++){
 						String str = "" + i + " " + j + " ";
+						str += ShapeParameters[2*i]+ " ";
+						str += ShapeParameters[2*i+1]+ " ";						
 						str += AvgVelocity[i][j] + " ";
 						str += TerminalVelocity[i][j] + " ";
 						str += MaxDisplacment[i][j] + " ";
