@@ -82,7 +82,7 @@ public class SeedDrop implements GLEventListener
 	RigidBody rb;
 	
 	/** Rigid body density. */
-	float density = 10f;
+	float density = 100f;
 	
 	/** Track terminal velocity of rb. */
 	double terminalVelocity;

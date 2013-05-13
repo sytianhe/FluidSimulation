@@ -79,24 +79,37 @@ public class RigidPolarShape extends RigidBody {
 	 */
 	public double wRatio (int row, int column){
 		
-		int numSample = 4;
+		int numSample = 6;
 		int counter = 0;
 		Vector2d sep = new Vector2d();
 		
-		for (int i=0; i<numSample; i++){
-			for(int j=0; j<numSample; j++){
-				sep.set(row + (i+0.5)/numSample,  column + (j+0.5)/numSample);
-				sep.sub(x);
-				this.transformW2B(sep);
-				double angle = Math.atan2(sep.y, sep.x);
-				double r = radialFunction(angle);
-				if (sep.length() <= r){
-					counter +=1;
+		sep.set(row + 0.5,  column + 0.5);
+		sep.sub(x);
+		this.transformW2B(sep);
+		double angle = Math.atan2(sep.y, sep.x);
+		double r = radialFunction(angle);
+		if (sep.length() <= r - 2){
+			return 1;
+		}
+		else if(sep.length() > r + 2){
+			return 0;
+		}
+		else{
+			//Perform subsampleing to 
+			for (int i=0; i<numSample; i++){
+				for(int j=0; j<numSample; j++){
+					sep.set(row + (i+0.5)/numSample,  column + (j+0.5)/numSample);
+					sep.sub(x);
+					this.transformW2B(sep);
+					angle = Math.atan2(sep.y, sep.x);
+					r = radialFunction(angle);
+					if (sep.length() <= r){
+						counter +=1;
+					}
 				}
 			}
-		}
-		
-		return counter * 1.0/(numSample*numSample);
+			return counter * 1.0/(numSample*numSample);
+		}		
 	}
 	
 	@Override
