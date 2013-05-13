@@ -4,6 +4,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -21,16 +23,16 @@ import com.jogamp.opengl.util.awt.Screenshot;
 
 /**
  * 
- * CS5643: Final Project Seed Drop Numerical Experiment. 
+ * CS5643: Final Project Seed Drop Experiment. 
  * 
- * We randomly generate and drop shapes into a fluid, and measure
+ * We randomly generate and drop shapes into a fluid, and measure some stuff about how they fall.
  * 
  * 
  * Base code by 
  * @author Doug James, April 2007
  * 
  * Extended by
- * @author homoflashmanicus
+ * @author homoflashmanicus, 2013
  */
 public class SeedDrop implements GLEventListener
 {
@@ -39,10 +41,10 @@ public class SeedDrop implements GLEventListener
 	float time;
 	
 	/** Number of shapes to sample. Sampled uniformly or at random?*/
-	int N_SHAPES = 1;
+	int N_SHAPES = 2;
 		
 	/** Number of drops per shape. Sampled uniformly or at random?*/ 
-	int N_SAMPLES_PER_SHAPE = 1;
+	int N_SAMPLES_PER_SHAPE = 2;
 	
 	/** Count the number of shapes so far. */
 	int shapeCounter = 0;
@@ -107,6 +109,10 @@ public class SeedDrop implements GLEventListener
 	
 	/** Reference to current FrameExporter, or null if no frames being dumped. */
 	FrameExporter frameExporter;
+	
+	/** Reference to file writer, or null if no date is being saved. */
+	FileWriter writer; 
+
 
 	private int width, height;
 
@@ -220,6 +226,37 @@ public class SeedDrop implements GLEventListener
 			//SAVE RESULTS AND END SIMULATION 
 			
 			// TODO : SAVE AND EXIT 
+			
+			long   timeNS   = -System.nanoTime();
+			String filename = "data/seeddrop"+timeNS + ".txt";/// BUG: DIRECTORY MUST EXIST!
+
+			
+			try {
+				writer = new FileWriter(filename);
+
+				writer.write("NSHAPES " + N_SHAPES + "\n");
+				writer.write("N_SAMPLES_PER_SHAPE " + N_SAMPLES_PER_SHAPE + "\n");
+				writer.write("DENSITY " + density + "\n");
+				writer.write("\n");
+
+				for (int i =0; i< N_SHAPES; i++){
+					for (int j=0; j< N_SAMPLES_PER_SHAPE; j ++){
+						String str = "" + i + " " + j + " ";
+						str += AvgVelocity[i][j] + " ";
+						str += TerminalVelocity[i][j] + " ";
+						str += MaxDisplacment[i][j] + " ";
+						str += FinalDisplacment[i][j] + "\n";
+						writer.write(str);
+					}
+				}
+				writer.close();
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+
+			
 			 
 			System.exit(0);
 		}
