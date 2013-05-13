@@ -762,8 +762,7 @@ public class FluidSolver
 	 * @param j
 	 * @return
 	 */
-	private float centerDiff(float[] p, int i, int j) {
-		
+	private float centerDiff(float[] p, int i, int j) {		
 		return  (p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j - 1)])  - 4f * p[I(i,j)]  ;
 	}
 	

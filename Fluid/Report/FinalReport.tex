@@ -46,6 +46,11 @@ Wind dispersal of  seeds is an important mechanism for mobility in many plant sp
 
 \section{Technical Description}
 \subsection{Fluid (Smoke)}
+We used the smoke based code for the to simulate the fluid. Followed the architecture outlined in \cite{fattal2004}, we implemented the driving forces and gathering forces to make the smoke function. For the gathering force, we implemented the equation proposed in the paper:
+$$ \mathbf{G}(\mathbf{\rho}, \mathbf{\rho}^*)  = \nabla \cdot [\mathbf{\rho} \tilde{\mathbf{\rho}}^* \nabla(\mathbf{\rho} - \mathbf{\rho}^*)]$$
+We also used MAC grid when we calculate the gradient.
+
+One of the problem of this method is that the smoke does not preserve. To fix this, we implemented the \texttt{normalizeDensity()} function, which maintains the density sum equal to the sum of keyframe density.
 
 \subsection{Rigid Body Coupling}
 We applied the idea presented in \cite{carlson2004} to update the velocity for the rigid body. According to equation (17) in the paper, the forces that arises from the relative density can be expressed as 
@@ -121,7 +126,7 @@ Poler coordinates is convenient to find volume, moment of inertia and the coeffi
 
 \section{Conclusion}
 We have described a simulation based approach  for quantifying the aerodynamics of random 2D shapes.  Applied to plant seeds, this approach provides for an (approximate) global understanding of the fitness landscape for seed morphology.  While we only present this project as a proof of concept, our approach has direct implications for the understanding of seed morphology, dispersal, population dynamics, and evolution.
-
+\nocite{*}
 \bibliographystyle{acmsiggraph}
 \bibliography{bibliography}
 
