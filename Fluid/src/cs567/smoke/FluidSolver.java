@@ -271,17 +271,17 @@ public class FluidSolver
 			addSource(v, vOld);
 			add(fx,uOld);
 			add(fy,vOld);
-
+			
+			// DAMP MOMENTUM:
+			for(int ij=0; ij<size; ij++) {
+				u[ij] -= Constants.V_d * dt * u[ij];
+				v[ij] -= Constants.V_d * dt * v[ij] ;
+				fx[ij] -= Constants.V_d * u[ij];
+				fy[ij] -= Constants.V_d * v[ij]  ;
+			}
 		}
 		
 		
-		// DAMP MOMENTUM:
-		for(int ij=0; ij<size; ij++) {
-			u[ij] -= Constants.V_d * dt * u[ij];
-			v[ij] -= Constants.V_d * dt * v[ij] ;
-			fx[ij] -= Constants.V_d * u[ij];
-			fy[ij] -= Constants.V_d * v[ij]  ;
-		}
 		
 		// add in vorticity confinement force
 		vorticityConfinement(uOld, vOld);
@@ -319,7 +319,7 @@ public class FluidSolver
 
 		// make an incompressible field
 		project(u, v, uOld, vOld);
-		//project(fx,fy,uOld, vOld);
+		project(fx,fy,uOld, vOld);
 		
 		
 		// MAKE UPDATE FOR THE RIGID BODIES CELLS
@@ -562,7 +562,7 @@ public class FluidSolver
 	{
 		float a = dt * diff * n * n;
 		linearSolver(b, c, c0, a, 1 + 4 * a);
-		//PCGSolver( b, c, c0, temp1 ,temp2, temp3, Constants.PCG_TOLERENCE );
+		//PCGSolver( b, c, c0, temp1 ,temp2, temp3, Constants.PCG_TOLERENCE ); //Not working
 
 	}
 
@@ -688,15 +688,17 @@ public class FluidSolver
 			}
 		}
 		
-		resSq = dotProd(r,r);
+		//resSq = dotProd(r,r);
 		rhoOld = dotProd(z, r)  ;
 		
 		// Start iterating
 		for (int k = 0; k < nIterations; k++){
 						
 			//Break if residual is small 
-			if ( resSq < tolerence ){
-				return;
+			if ( rhoOld < tolerence ){
+				if (dotProd(r,r)<tolerence){
+					return;
+				}
 			}	
 			
 			//Mult p by A
@@ -718,7 +720,7 @@ public class FluidSolver
 			}
 			
 			//Compute new residual
-			resSq = dotProd(r,r);
+			//resSq = dotProd(r,r);
 			rhoNew = dotProd(z,r);
 
 			// Compute new conjugate  vector

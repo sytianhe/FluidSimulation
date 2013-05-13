@@ -41,10 +41,10 @@ public class SeedDrop implements GLEventListener
 	float time;
 	
 	/** Number of shapes to sample. Sampled uniformly or at random?*/
-	int N_SHAPES = 2;
+	int N_SHAPES = 40;
 		
 	/** Number of drops per shape. Sampled uniformly or at random?*/ 
-	int N_SAMPLES_PER_SHAPE = 2;
+	int N_SAMPLES_PER_SHAPE = 10;
 	
 	/** Count the number of shapes so far. */
 	int shapeCounter = 0;
