@@ -2,14 +2,8 @@ package cs567.smoke;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -45,28 +39,54 @@ public class SeedDrop implements GLEventListener
 	float time;
 	
 	/** Number of shapes to sample. Sampled uniformly or at random?*/
-	int N_SHAPES = 100;
-	
+	int N_SHAPES = 1;
+		
 	/** Number of drops per shape. Sampled uniformly or at random?*/ 
-	int N_SAMPLES_PER_SHAPE = 10;
+	int N_SAMPLES_PER_SHAPE = 1;
+	
+	/** Count the number of shapes so far. */
+	int shapeCounter = 0;
+	
+	/** Count the number of samples per shape so far. */
+	int sampleCounter = 0;
 	
 	/** Store average velocity per drop per shape. */
-	float[][] AvgVelocity;
+	double[][] AvgVelocity;
 	
 	/** Store terminal velocity per drop per shape. */
-	float[][] TerminalVelocity;
+	double[][] TerminalVelocity;
 	
 	/** Store max horizontal displacement. */
-	float[][] MaxDisplacment;
+	double[][] MaxDisplacment;
 	
 	/** Store max horizontal displacement. */
-	float[][] FinalDisplacment;
+	double[][] FinalDisplacment;
+	
+	/** Start Position. */
+	Point2d StartPosition = new Point2d(Constants.N/2f, Constants.N - 10f);
+	
+	/** Start Velocity. */
+	Vector2d StartVelocity = new Vector2d();
 	
 	/** Grid height at which we take measurments.  To avoid the pesky computational reigion at the edges. */ 
 	float MeasureHeight = 10;
 	
+	/** Current rigid body being simulated. */
+	RigidBody rb;
+	
+	/** Rigid body density. */
+	float density = 10f;
+	
+	/** Track terminal velocity of rb. */
+	double terminalVelocity;
+	
+	/** Track max discplacement of rigid body. */
+	double maxDisplacement;
 	
 	
+	/** Keep my fluid safe. */
+	FluidSolver fs;
+
 	
 	/** NOW FOR A BUNCH OF (MOSTLY) DISPLAY PARAMETERS. */
 
@@ -98,22 +118,194 @@ public class SeedDrop implements GLEventListener
 	/** Draws wireframe if true, and pixel blocks if false. */
 	boolean drawWireframe = false;
 
-	/** Keep my fluid safe. */
-	FluidSolver fs;
+	/** Useful for displaying stuff. */
+	private OrthoMap orthoMap;
+
 
 	/** 
 	 * Main constructor. Call start() to begin simulation. 
 	 * 
 	 */
 	SeedDrop(){
+		//Initialize data storage
+		AvgVelocity = new double[N_SHAPES][N_SAMPLES_PER_SHAPE];
+		TerminalVelocity = new double[N_SHAPES][N_SAMPLES_PER_SHAPE];
+		MaxDisplacment = new double[N_SHAPES][N_SAMPLES_PER_SHAPE];
+		FinalDisplacment = new double[N_SHAPES][N_SAMPLES_PER_SHAPE];
 
+		//Initialize fluid solver
 		fs = new FluidSolver();
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
-
-		//ADD RIGID BODIES
-		RigidEllipse2 rb = new RigidEllipse2(new Point2d(30,90), new Vector2d(0.0,-1.0), -1., 0, 10, 3, 2);
-		fs.addRigidBody(rb);
 	}
+	
+	/** Simulate then display particle system and any builder
+	 * adornments. */
+	void simulateAndDisplayScene(GL2 gl)
+	{
+		
+		//////////////////////
+		// SIMULATE
+		///////////////////////
+		if(simulate && shapeCounter < N_SHAPES) {
+			
+			//initialzie new experiment as needed
+			if(rb == null){
+
+				System.out.println("CREATING NEW RIDIG BODY");
+				
+				sampleCounter = 0;
+
+				// GENERATE NEW SHAPE.
+				// SHAPE SHOULD CONSERVE SOME QUANTITY?????
+				// eg volume, surface area, mass, etc 
+				rb = new RigidEllipse2(StartPosition, StartVelocity,0, 0, density,3 + Math.random(),3 +  Math.random());
+				fs.addRigidBody(rb);
+				
+				time = 0;
+				maxDisplacement = 0;
+				terminalVelocity = 0;
+			}
+			
+			//PERFORM FLUID SIMULATION 
+			for(int s=0; s<N_STEPS_PER_FRAME; s++) {
+				fs.velocitySolver();
+				fs.densitySolver();  //Add some smoke if you want to see fluid motion.
+				time += dt; 
+			}
+			
+			//Update and tracked quantities
+			// KEEP RECORD OF TERMINAL VELOCITY AND MAX HOR
+			terminalVelocity = Math.max( rb.v.lengthSquared(), terminalVelocity) ;
+			maxDisplacement = Math.max(Math.abs(rb.getPosition().x-StartPosition.x), maxDisplacement);
+			
+			if(rb.getPosition().y < MeasureHeight)
+			{
+				System.out.println("RIGID BODY REACHED BOTTOM");
+			
+				//Shape reached the bottom, so save data.
+				AvgVelocity[shapeCounter][sampleCounter] = (StartPosition.y - MeasureHeight)/time;
+				TerminalVelocity[shapeCounter][sampleCounter] = terminalVelocity;
+				MaxDisplacment[shapeCounter][sampleCounter] = maxDisplacement ;
+				FinalDisplacment[shapeCounter][sampleCounter] = (rb.getPosition().x - StartPosition.x);
+								
+				//Reset fluid system.
+				fs.reset();
+				
+				if(sampleCounter < N_SAMPLES_PER_SHAPE-1){
+					System.out.println("RESET RIGID BODY AND ROTATE");
+
+					//Setup new drop with the same shape
+					sampleCounter += 1;
+					rb.reset();
+					rb.theta += Math.PI * sampleCounter/(N_SAMPLES_PER_SHAPE);
+					time = 0;
+					maxDisplacement = 0;
+					terminalVelocity = 0;
+
+				}
+				else{
+					System.out.println("CLEAR RIGID BODY FOR NEW SHAPE");
+					
+					//clear rb for a new shape
+					shapeCounter += 1;
+					fs.RB.clear();
+					rb = null;
+				}
+			}
+		}
+		else if(simulate && shapeCounter == N_SHAPES ){
+			
+			System.out.println("ALL DONE");
+
+			//SAVE RESULTS AND END SIMULATION 
+			
+			// TODO : SAVE AND EXIT 
+			 
+			System.exit(0);
+		}
+
+
+
+
+		////////////////////
+		// DRAW 
+		////////////////////
+
+
+		{//DRAW RASTER:
+
+			int N = n + 2;
+			float h = 1.f/(float)n;
+			for(int row=0; row<N-1; row++) {
+				gl.glBegin(gl.GL_QUAD_STRIP);
+
+				float y = row * h;
+
+				for(int i=0; i<=n+1; i++) {
+					float x = (i - 0.5f) * h;
+
+					float d = getDrawDensity(i,row);
+					gl.glColor3f(d, d, d);
+					gl.glVertex2f(x, y);
+
+					d = getDrawDensity(i,row+1);
+					gl.glColor3f(d, d, d);
+					gl.glVertex2f(x, y+h);
+				}
+				gl.glEnd();
+			}
+
+		}
+
+		if(rb!=null){
+			rb.display(gl);
+		}
+		
+		if(veldisplay){
+			/// DON'T DRAW 0, n+1 border:
+			for(int i=1; i<=n; i++) {
+				gl.glBegin(gl.GL_LINES);
+				gl.glLineWidth(0.05f);
+				gl.glColor3f(1.0f, 0.0f, 0.0f);
+				float x = (i + 0.5f)/(float)n;
+
+				for(int j=1; j<=n; j++) {
+					float y = (j + 0.5f)/(float)n;
+					Vector2f temp = new Vector2f(fs.u[Constants.I(i,j)], fs.v[Constants.I(i,j)]);
+					//System.out.println(temp);
+					temp.scale(0.1f);
+					gl.glVertex2f(x, y);
+					float u = temp.x;
+					float v = temp.y;
+					gl.glVertex2f(x+u, y+v);
+
+				}
+				gl.glEnd();
+			}
+		}
+		
+		if(forcedisplay){
+			/// DON'T DRAW 0, n+1 border:
+			for(int i=1; i<=n; i++) {
+				gl.glBegin(gl.GL_LINES);
+				gl.glLineWidth(0.1f);
+				gl.glColor3f(0.0f, 1.0f, 0.0f);
+				float x = (i - 0.5f)/(float)n;
+
+				for(int j=1; j<=n; j++) {
+					float y = (j - 0.5f)/(float)n;
+					Vector2f temp = new Vector2f(fs.fx[Constants.I(i,j)], fs.fy[Constants.I(i,j)]);
+					gl.glVertex2f(x, y);
+					float u = 0.1f*temp.x;
+					float v = 0.1f*temp.y;
+					gl.glVertex2f(x+u, y+v);
+
+				}
+				gl.glEnd();
+			}
+		}
+	}
+
 
 
 	/**
@@ -156,10 +348,6 @@ public class SeedDrop implements GLEventListener
 		frame.setVisible(true);
 		animator.start();
 	}
-
-
-
-	private OrthoMap orthoMap;
 
 	/** GLEventListener implementation: Initializes JOGL renderer. */
 	public void init(GLAutoDrawable drawable) 
@@ -231,99 +419,6 @@ public class SeedDrop implements GLEventListener
 		if(frameExporter != null)  frameExporter.writeFrame();
 	}
 
-	/** Simulate then display particle system and any builder
-	 * adornments. */
-	void simulateAndDisplayScene(GL2 gl)
-	{
-		if(simulate) {/// TAKE dt step
-			for(int s=0; s<N_STEPS_PER_FRAME; s++) {
-				fs.velocitySolver();/// <<<-- with control forces
-				fs.densitySolver();
-			}
-		}
-
-
-
-		////////////////////
-		// DRAW 
-		////////////////////
-
-
-		{//DRAW RASTER:
-
-			int N = n + 2;
-			float h = 1.f/(float)n;
-			for(int row=0; row<N-1; row++) {
-				gl.glBegin(gl.GL_QUAD_STRIP);
-
-				float y = row * h;
-
-				for(int i=0; i<=n+1; i++) {
-					float x = (i - 0.5f) * h;
-
-					float d = getDrawDensity(i,row);
-					gl.glColor3f(d, d, d);
-					gl.glVertex2f(x, y);
-
-					d = getDrawDensity(i,row+1);
-					gl.glColor3f(d, d, d);
-					gl.glVertex2f(x, y+h);
-				}
-				gl.glEnd();
-			}
-
-		}
-
-		if(fs.RB!=null){
-			for (RigidBody rb: fs.RB){
-				rb.display(gl);
-			}
-		}
-		
-		if(veldisplay){
-			/// DON'T DRAW 0, n+1 border:
-			for(int i=1; i<=n; i++) {
-				gl.glBegin(gl.GL_LINES);
-				gl.glLineWidth(0.05f);
-				gl.glColor3f(1.0f, 0.0f, 0.0f);
-				float x = (i + 0.5f)/(float)n;
-
-				for(int j=1; j<=n; j++) {
-					float y = (j + 0.5f)/(float)n;
-					Vector2f temp = new Vector2f(fs.u[Constants.I(i,j)], fs.v[Constants.I(i,j)]);
-					//System.out.println(temp);
-					temp.scale(0.1f);
-					gl.glVertex2f(x, y);
-					float u = temp.x;
-					float v = temp.y;
-					gl.glVertex2f(x+u, y+v);
-
-				}
-				gl.glEnd();
-			}
-		}
-		
-		if(forcedisplay){
-			/// DON'T DRAW 0, n+1 border:
-			for(int i=1; i<=n; i++) {
-				gl.glBegin(gl.GL_LINES);
-				gl.glLineWidth(0.1f);
-				gl.glColor3f(0.0f, 1.0f, 0.0f);
-				float x = (i - 0.5f)/(float)n;
-
-				for(int j=1; j<=n; j++) {
-					float y = (j - 0.5f)/(float)n;
-					Vector2f temp = new Vector2f(fs.fx[Constants.I(i,j)], fs.fy[Constants.I(i,j)]);
-					gl.glVertex2f(x, y);
-					float u = 0.1f*temp.x;
-					float v = 0.1f*temp.y;
-					gl.glVertex2f(x+u, y+v);
-
-				}
-				gl.glEnd();
-			}
-		}
-	}
 
 	private float getDrawDensity(int i, int j) { 
 		float d = 2*fs.getDensity(i,j);///arbitrary scaling
