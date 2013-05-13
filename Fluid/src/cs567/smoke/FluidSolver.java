@@ -594,7 +594,7 @@ public class FluidSolver
 		{
 			for (int j = 1; j <= n; j++)
 			{
-				div[I(i, j)] = (x[I(i+1, j)] - x[I(i-1, j)] + y[I(i, j+1)] - y[I(i, j-1)]) * - 0.5f / n;
+				div[I(i, j)] = (x[I(i+1, j)] - x[I(i-1, j)] + y[I(i, j+1)] - y[I(i, j-1)]) *  0.5f / n;
 				p[I(i, j)] = 0;
 			}
 		}
@@ -602,6 +602,7 @@ public class FluidSolver
 		setBoundary(0, div);
 		setBoundary(0, p);
 
+		//THIS SOLVER WONT WORK RIGHT NOW.  NEED TO ADD A MINUS SIGN TO DIV ABOVE.
 		//linearSolver(0, p, div, 1, 4);
 		
 		PCGSolver(0, p, div, temp1, temp2, temp3, Constants.PCG_TOLERENCE);
@@ -675,7 +676,7 @@ public class FluidSolver
 		float rhoNew = 0;
 		float resSq = 0;
 		float alpha = 0;
-		float Minv = -1/4f;  //PRECONDITION ON THE DIAGONAL ENTRIES OF A
+		float Minv = 1/4f;  //PRECONDITION ON THE DIAGONAL ENTRIES OF A
 		
 		// Initiialize the solver
 		for (int i = 1; i <= n; i++)
@@ -764,8 +765,8 @@ public class FluidSolver
 	 * @param j
 	 * @return
 	 */
-	private float centerDiff(float[] p, int i, int j) {
-		return  -(p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j - 1)])  + 4f * p[I(i,j)]  ;
+	private float centerDiff(float[] p, int i, int j) {		
+		return  (p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j - 1)])  - 4f * p[I(i,j)]  ;
 	}
 	
 	private float dotProd(float[]p, float[]q){
