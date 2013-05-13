@@ -18,6 +18,7 @@ public class RigidCircle extends RigidBody
 	public RigidCircle(Point2d centerOfMass, Vector2d LinVel,double theta, double AngVel, double d, int r) {
 		super(centerOfMass, LinVel,theta, AngVel, d);
 		radius =r;
+		maxRadius = r;
 		mass = Math.PI*r*r*d;
 		momentOfInertia = mass * r * r / 2;
 	}

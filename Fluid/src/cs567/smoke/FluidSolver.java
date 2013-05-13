@@ -364,11 +364,15 @@ public class FluidSolver
 			rb.v.set(0.0,0.0);
 			rb.omega = 0;
 			
-			//float mass =0 ;
-			//float momentOfInertia = 0;
-			for (int i = 1; i <= n; i++)
+			//Get computational domain
+			int iMin = (int) Math.floor(Math.max( rb.x.x - rb.maxRadius - 5, 1 ));
+			int iMax = (int) Math.ceil(Math.min( rb.x.x + rb.maxRadius + 5, n ));
+			int jMin = (int) Math.floor(Math.max( rb.x.y - rb.maxRadius - 5, 1 ));
+			int jMax = (int) Math.ceil(Math.min( rb.x.y + rb.maxRadius + 5, n ));
+			
+			for (int i = iMin; i <= iMax; i++)
 			{
-				for (int j = 1; j <= n; j++)
+				for (int j = jMin; j <= jMax; j++)
 				{
 					double w = rb.wRatio(i, j);
 					if (w > 0){
@@ -409,9 +413,9 @@ public class FluidSolver
 			rb.v.scale(rb.getInverseMass());
 			rb.omega *= rb.getInverseMomentOfInertia();
 			
-			for (int i = 1; i <= n; i++)
+			for (int i = iMin; i <= iMax; i++)
 			{
-				for (int j = 1; j <= n; j++)
+				for (int j = jMin; j <= jMax; j++)
 				{
 					double w = rb.wRatio(i, j);
 					if (w > 0){

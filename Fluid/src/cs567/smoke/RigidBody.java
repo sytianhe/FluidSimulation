@@ -46,6 +46,9 @@ public class RigidBody
 	/** Volume */
 	double volume;
 	
+	/** Maximum radius. */
+	double maxRadius;
+	
 	/** MomentOfInertia */
 	double momentOfInertia;
 	

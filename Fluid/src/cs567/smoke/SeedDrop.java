@@ -6,6 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -74,6 +75,8 @@ public class SeedDrop implements GLEventListener
 	
 	/** Start Velocity. */
 	Vector2d StartVelocity = new Vector2d();
+	
+	ArrayList<Point2d> path = new ArrayList<Point2d>();
 	
 	/** Grid height at which we take measurments.  To avoid the pesky computational reigion at the edges. */ 
 	float MeasureHeight = 10;
@@ -197,6 +200,7 @@ public class SeedDrop implements GLEventListener
 			// KEEP RECORD OF TERMINAL VELOCITY AND MAX HOR
 			terminalVelocity = Math.max( rb.v.lengthSquared(), terminalVelocity) ;
 			maxDisplacement = Math.max(Math.abs(rb.getPosition().x-StartPosition.x), maxDisplacement);
+			path.add(new Point2d(rb.x));
 			
 			if(rb.getPosition().y < MeasureHeight)
 			{
@@ -208,8 +212,14 @@ public class SeedDrop implements GLEventListener
 				MaxDisplacment[shapeCounter][sampleCounter] = maxDisplacement ;
 				FinalDisplacment[shapeCounter][sampleCounter] = (rb.getPosition().x - StartPosition.x);
 								
-				//Reset fluid system.
+				//Reset fluid system.  And measurument variables
 				fs.reset();
+				time = 0;
+				maxDisplacement = 0;
+				terminalVelocity = 0;
+				path.clear();
+
+
 				
 				if(sampleCounter < N_SAMPLES_PER_SHAPE-1){
 					System.out.println("RESET RIGID BODY AND ROTATE");
@@ -218,9 +228,6 @@ public class SeedDrop implements GLEventListener
 					sampleCounter += 1;
 					rb.reset();
 					rb.theta += Math.PI * sampleCounter/(N_SAMPLES_PER_SHAPE);
-					time = 0;
-					maxDisplacement = 0;
-					terminalVelocity = 0;
 
 				}
 				else{
@@ -286,32 +293,16 @@ public class SeedDrop implements GLEventListener
 		////////////////////
 		// DRAW 
 		////////////////////
-
-
-		{//DRAW RASTER:
-
-			int N = n + 2;
-			float h = 1.f/(float)n;
-			for(int row=0; row<N-1; row++) {
-				gl.glBegin(gl.GL_QUAD_STRIP);
-
-				float y = row * h;
-
-				for(int i=0; i<=n+1; i++) {
-					float x = (i - 0.5f) * h;
-
-					float d = getDrawDensity(i,row);
-					gl.glColor3f(d, d, d);
-					gl.glVertex2f(x, y);
-
-					d = getDrawDensity(i,row+1);
-					gl.glColor3f(d, d, d);
-					gl.glVertex2f(x, y+h);
-				}
-				gl.glEnd();
-			}
-
+		{//DRAW PATH:
+			gl.glLineWidth((float) 1f); 
+			gl.glColor3d(0.0, 0.0, 1.0);
+			gl.glBegin(GL2.GL_LINES);
+			for(Point2d p : path){
+				gl.glVertex2d(p.x/Constants.N, p.y/Constants.N);
+			}			
+			gl.glEnd();
 		}
+		
 
 		if(rb!=null){
 			rb.display(gl);

@@ -15,7 +15,7 @@ public class Constants
     public static final float dt = 0.005f;/// <-- MAY NEED TO REDUCE
 
     /** Resolution of N-by-N computational grid. */
-    public static final int N = 125;
+    public static final int N = 100;
 
     /** Resolution of (n+2)-by-(n+2) computational grid. */
     public static final int n = N-2;/// <-- DO NOT CHANGE
@@ -40,10 +40,10 @@ public class Constants
     public static final float V_f = 2f;
 
     /** Gathering rate amplitude, V_g (default: 0.0005)  */
-    public static final float V_g = 0.2f;
+    public static final float V_g = 0.1f;
 
     /** Drag force amplitude, V_d (default: 0.5)  */
-    public static final float V_d = 0.01f;
+    public static final float V_d = 0.5f;
 
     /** Smoke diffusion coefficient (default: 0.0001). Nonzero values are needed (I
      * believe) to avoid instabilities during smoke control. */

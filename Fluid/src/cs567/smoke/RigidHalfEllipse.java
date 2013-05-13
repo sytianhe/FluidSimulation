@@ -18,8 +18,8 @@ public class RigidHalfEllipse extends RigidPolarShape {
 	
 	@Override
 	public double radialFunction(double theta){
-		double t = (theta + 2* Math.PI) % ( 2* Math.PI )  ; 
-		if ( t > Math.PI && t < 2*Math.PI)  return 0;
+		theta = modAngle(theta);
+		if ( theta > Math.PI && theta < 2*Math.PI)  return 0;
 		return majorAxis * minorAxis / Math.sqrt( Math.pow(minorAxis * Math.cos(theta), 2.0) + Math.pow(majorAxis * Math.sin(theta), 2.0)   );
 	}
 	
