@@ -37,6 +37,12 @@ public class FluidSolver
 	/** Curl grid */
 	float[] curl;
 	
+	/** More space for computations. */
+	float[] temp1;
+	float[] temp2; 
+	float[] temp3; 
+	
+	
 	/** Number of frames */
 	int n_STEPS_PER_FRAME = 1;
 
@@ -93,12 +99,16 @@ public class FluidSolver
 		if(fy==null)   fy   = new float[size];
 		if(uPrev==null) uPrev = new float[size];
 		if(vPrev==null) vPrev = new float[size];
+		if(temp1==null) temp1 = new float[size];
+		if(temp2==null) temp2 = new float[size];
+		if(temp3==null) temp3 = new float[size];
 
 
 		for (int i = 0; i < size; i++)
 		{
 			u[i] = uOld[i] = fx[i] = v[i] = vOld[i] = fy[i] = uPrev[i] = vPrev[i] = 0.0f;
 			d[i] = dOld[i] = curl[i] = 0.0f;
+			temp1[i] = temp2[i] = temp3[i] = 0;
 		}
 		
 		for (RigidBody rb : RB) rb.reset();
@@ -475,23 +485,6 @@ public class FluidSolver
 		for(int i=0; i<size; i++)  dOld[i] = 0;
 	}
 
-
-
-	/** x += dt * x0 */
-	private void addSource(float[] x, float[] x0)
-	{
-		for (int i=0; i<size; i++)
-			x[i] += dt * x0[i];
-	}
-
-	/** x +=  x0 */
-	private void add(float[] x, float[] x0)
-	{
-		for (int i=0; i<size; i++)
-			x[i] += x0[i];
-	}
-
-
 	/**
 	 * Calculate the input array after advection. We start with an
 	 * input array from the previous timestep and an and output array.
@@ -568,7 +561,11 @@ public class FluidSolver
 	private void diffuse(int b, float[] c, float[] c0, float diff)
 	{
 		float a = dt * diff * n * n;
+		//scale(c0,c0, );
+		
 		linearSolver(b, c, c0, a, 1 + 4 * a);
+		//PCGSolver( b, c, c0, temp1 ,temp2, temp3, Constants.PCG_TOLERENCE );
+
 	}
 
 
@@ -606,7 +603,8 @@ public class FluidSolver
 		setBoundary(0, p);
 
 		//linearSolver(0, p, div, 1, 4);
-		PCGSolver(0, p, div);
+		
+		PCGSolver(0, p, div, temp1, temp2, temp3, Constants.PCG_TOLERENCE);
 
 		for (int i = 1; i <= n; i++)
 		{
@@ -652,76 +650,123 @@ public class FluidSolver
 	}
 	
 	/** 
-	 * PCG SOLVER!
+	 * PCG SOLVER FOR THE POISSON EQUAITION 
+	 * 
+	 * Use simple diagonel entry proconditioner.
+	 * Could use incomplete Cholesky if we want to get fancy
+	 * 
+	 * Solve   A * x = b
+     *         |   |   |
+     *        Lap  x   x0
+	 * 
+	 * @param b Boundary condition flag 
+	 * @param x Solve for this
+	 * @param x0 The right hand side of Ax = alpha b
+	 * @param r Common storaage for residual vector
+	 * @param p Common storage for orthogonal vector
+	 * @param z Common storage for matrix multiplication of A and p
+	 * @param Constants.PCG_TOLERENCE Miniumum solver precision
+	 * 
 	 */
-	void PCGSolver(int b, float[] x, float[] x0)
+	void PCGSolver(int b, float[] x, float[] x0, float[] r, float[] p, float []z, float tolerence  )
 	{
 		int nIterations = Constants.N_GAUSS_SEIDEL_ITERATIONS;
+		float rhoOld = 0;
+		float rhoNew = 0;
+		float resSq = 0;
+		float alpha = 0;
+		float Minv = -1/4f;  //PRECONDITION ON THE DIAGONAL ENTRIES OF A
 		
-		// finding r = b   -   A*x
-		//             |       | |
-		//             x0        0 
-		float []res = new float[size]; //residual
-		float [] p  = new float[size];
+		// Initiialize the solver
+		for (int i = 1; i <= n; i++)
+		{
+			for (int j = 1; j <= n; j++)
+			{	
+				r[I(i,j)] = x0[I(i, j)];  //Assume x = 0
+				z[I(i,j)] = Minv * r[I(i,j)] ;
+				p[I(i,j)] = z[I(i,j)];
+			}
+		}
 		
+		resSq = dotProd(r,r);
+		rhoOld = dotProd(z, r)  ;
+		
+		// Start iterating
+		for (int k = 0; k < nIterations; k++){
+						
+			//Break if residual is small 
+			if ( resSq < tolerence ){
+				System.out.println("TOLERENCE MET AFTER " + k + " STEPS");
+				return;
+			}	
+			
+			//Mult p by A
+			matVecProd(p,z);
+			
+			//Compute scaling factor
+			alpha = rhoOld/dotProd(p, z);  
+			
+			// Update x and residual
+			for (int i = 1; i <= n; i++)
+			{
+				for (int j = 1; j <= n; j++)
+				{
+					x[I(i,j)] += alpha*p[I(i,j)];
+					r[I(i,j)] -= alpha*z[I(i,j)];
+					//Solve for z  = Minv * r
+					z[I(i,j)] = r[I(i,j)] * Minv;
+				}
+			}
+			
+			//Compute new residual
+			resSq = dotProd(r,r);
+			rhoNew = dotProd(z,r);
+
+			// Compute new conjugate  vector
+			for (int i = 1; i <= n; i++)
+			{
+				for (int j = 1; j <= n; j++)
+				{	
+					p[I(i,j)] = z[I(i, j)]  +  rhoNew/rhoOld * p[I(i,j)]  ;
+				}
+			}
+			
+			//Update old residual 
+			rhoOld = rhoNew;
+			
+			//Enforce boundary conditions on projection (or on x ? or both ?)
+			setBoundary(b, x);
+
+		}
+		System.out.println("SOLVER FINISHED WITHOUT CONVERGENCE. RESIDUAL = " + rhoOld);
+	}
+
+	/**
+	 * Multiply in by Discrete Laplacian Operator
+	 * @param in input vector
+	 * @param out output vector
+	 */
+	private void matVecProd(float[] in, float[] out){
+
 		for (int i = 1; i <= n; i++)
 		{
 			for (int j = 1; j <= n; j++)
 			{
-				res[I(i,j)] = p[I(i,j)] = x0[I(i, j)];
+				out[I(i,j)] = centerDiff(in, i, j);
 			}
-		}
-		//setBoundary(b, res);
-		//setBoundary(b, p); 
-		
-		float rsold = dotProd(res, res);
-		System.out.println(rsold);
-		
-		for (int k = 0; k < nIterations; k++){
-			float []Ap = new float[size];
-			for (int i = 1; i <= n; i++)
-			{
-				for (int j = 1; j <= n; j++)
-				{
-					Ap[I(i,j)] = centerDiff(p, i, j);
-				}
-			}
-			//setBoundary(b, Ap);
-			
-			float alpha = 0;
-			if (rsold>0) alpha = rsold/dotProd(p, Ap);
-			
-			for (int i = 1; i <= n; i++)
-			{
-				for (int j = 1; j <= n; j++)
-				{
-					x[I(i,j)]   += alpha*Ap[I(i,j)];
-					res[I(i,j)] -= alpha*Ap[I(i,j)];
-				}
-			}
-			//setBoundary(b, x);
-			
-			float rsnew = dotProd(res,res);
-			if (rsnew < 0.000001 ){
-				break;
-			}
-			
-			for (int i = 1; i <= n; i++)
-			{
-				for (int j = 1; j <= n; j++)
-				{
-					p[I(i,j)] = res[I(i,j)] + rsnew/rsold*p[I(i,j)];
-				}
-			}
-			setBoundary(b, p);
-			rsold = rsnew;
 		}
 	}
 
-
+	/** Compute center difference of p at (i,j).
+	 * 
+	 * @param p
+	 * @param i
+	 * @param j
+	 * @return
+	 */
 	private float centerDiff(float[] p, int i, int j) {
 		
-		return  - 4f * p[I(i,j)] + (p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j - 1)]);
+		return  -(p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j - 1)])  + 4f * p[I(i,j)]  ;
 	}
 	
 	private float dotProd(float[]p, float[]q){
@@ -731,6 +776,37 @@ public class FluidSolver
 		}
 		return temp;
 	}
+	
+	
+	/** x += dt * x0 */
+	private void addSource(float[] x, float[] x0)
+	{
+		for (int i=0; i<size; i++)
+			x[i] += dt * x0[i];
+	}
+
+	/** x +=  x0 */
+	private void add(float[] x, float[] x0)
+	{
+		for (int i=0; i<size; i++)
+			x[i] += x0[i];
+	}
+	
+	/** x +=  a * x0 */
+	private void scaleAdd(float[] x, float[] x0, float a)
+	{
+		for (int i=0; i<size; i++)
+			x[i] += a * x0[i];
+	}
+
+	/** x +=  a * x0 */
+	private void scale(float[] x, float[] x0, float a)
+	{
+		for (int i=0; i<size; i++)
+			x[i] = a * x0[i];
+	}
+
+	
 
 	/** Specifies simple boundary conditions. */
 	private void setBoundary(int b, float[] x)
@@ -749,7 +825,7 @@ public class FluidSolver
 		x[I(n+1, n+1)] = 0.5f * (x[I(n, n+1)] + x[I(n+1, n)]);
 
 	}
-
+	
 	/** util array swapping method */
 	public void swapU(){ tmp = u; u = uOld; uOld = tmp; }
 	/** util array swapping method */

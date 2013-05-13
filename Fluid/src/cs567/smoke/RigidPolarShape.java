@@ -79,7 +79,7 @@ public class RigidPolarShape extends RigidBody {
 	 */
 	public double wRatio (int row, int column){
 		
-		int numSample = 3;
+		int numSample = 4;
 		int counter = 0;
 		Vector2d sep = new Vector2d();
 		
