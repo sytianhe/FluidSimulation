@@ -12,7 +12,7 @@ public class Constants
 {
     /** Time-step size. Note that explicitly integrated smoke-control
      * forcing/density terms can impose step-size restrictions. (default: 0.005)*/
-    public static final float dt = 0.005f;/// <-- MAY NEED TO REDUCE
+    public static final float dt = 0.01f;/// <-- MAY NEED TO REDUCE
 
     /** Resolution of N-by-N computational grid. */
     public static final int N = 100;
@@ -32,7 +32,9 @@ public class Constants
     
     /** Iterations used in FluidSolver.linearSolver(). */
     public static final int N_GAUSS_SEIDEL_ITERATIONS = N;
-
+    
+    /** Tolerence of PCG linear solver. */
+    public static final float PCG_TOLERENCE = 0.00000001f;
 
     /** Driving force amplitude, V_f (default: 2)  */
     public static final float V_f = 2f;
