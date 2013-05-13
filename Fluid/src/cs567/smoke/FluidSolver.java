@@ -721,7 +721,7 @@ public class FluidSolver
 
 	private float centerDiff(float[] p, int i, int j) {
 		
-		return  - 4f * p[I(i,j)] + (p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j - 1)]);
+		return  - 4f * p[I(i,j)] + (p[I(i+1, j)] + p[I(i-1, j)] + p[I(i, j+1)] + p[I(i, j-1)]);
 	}
 	
 	private float dotProd(float[]p, float[]q){
