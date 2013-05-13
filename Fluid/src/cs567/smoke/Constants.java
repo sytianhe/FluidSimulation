@@ -43,7 +43,7 @@ public class Constants
     public static final float V_g = 0.2f;
 
     /** Drag force amplitude, V_d (default: 0.5)  */
-    public static final float V_d = 0.1f;
+    public static final float V_d = 0.01f;
 
     /** Smoke diffusion coefficient (default: 0.0001). Nonzero values are needed (I
      * believe) to avoid instabilities during smoke control. */

@@ -319,7 +319,7 @@ public class FluidSolver
 
 		// make an incompressible field
 		project(u, v, uOld, vOld);
-		project(fx,fy,uOld, vOld);
+		//project(fx,fy,uOld, vOld);
 		
 		
 		// MAKE UPDATE FOR THE RIGID BODIES CELLS
@@ -561,8 +561,6 @@ public class FluidSolver
 	private void diffuse(int b, float[] c, float[] c0, float diff)
 	{
 		float a = dt * diff * n * n;
-		//scale(c0,c0, );
-		
 		linearSolver(b, c, c0, a, 1 + 4 * a);
 		//PCGSolver( b, c, c0, temp1 ,temp2, temp3, Constants.PCG_TOLERENCE );
 
@@ -661,7 +659,7 @@ public class FluidSolver
      *        Lap  x   x0
 	 * 
 	 * @param b Boundary condition flag 
-	 * @param x Solve for this
+	 * @param x Solve for this.  With out loss of generality, we set x = 0 at start
 	 * @param x0 The right hand side of Ax = alpha b
 	 * @param r Common storaage for residual vector
 	 * @param p Common storage for orthogonal vector
@@ -683,7 +681,8 @@ public class FluidSolver
 		{
 			for (int j = 1; j <= n; j++)
 			{	
-				r[I(i,j)] = x0[I(i, j)];  //Assume x = 0
+				x[I(i,j)] = 0f;
+				r[I(i,j)] = x0[I(i, j)];  
 				z[I(i,j)] = Minv * r[I(i,j)] ;
 				p[I(i,j)] = z[I(i,j)];
 			}
@@ -697,7 +696,6 @@ public class FluidSolver
 						
 			//Break if residual is small 
 			if ( resSq < tolerence ){
-				System.out.println("TOLERENCE MET AFTER " + k + " STEPS");
 				return;
 			}	
 			
@@ -739,7 +737,6 @@ public class FluidSolver
 			setBoundary(b, x);
 
 		}
-		System.out.println("SOLVER FINISHED WITHOUT CONVERGENCE. RESIDUAL = " + rhoOld);
 	}
 
 	/**
@@ -800,11 +797,11 @@ public class FluidSolver
 			x[i] += a * x0[i];
 	}
 
-	/** x +=  a * x0 */
-	private void scale(float[] x, float[] x0, float a)
+	/** x =  a * x0 */
+	private void scale(float[] x, float a)
 	{
 		for (int i=0; i<size; i++)
-			x[i] = a * x0[i];
+			x[i] *= a ;
 	}
 
 	
@@ -840,9 +837,15 @@ public class FluidSolver
 	public void addRigidBodies(ArrayList<RigidBody> rbs) {
 		RB = rbs;
 	}
+	
+	public void addRigidBody(RigidBody rb) {
+		RB.add(rb);
+	}
 
 	public void setNumerofFrame(int n_STEPS_PER_FRAME) {
 		// TODO Auto-generated method stub
 		this.n_STEPS_PER_FRAME = n_STEPS_PER_FRAME;
 	}
+
+
 }

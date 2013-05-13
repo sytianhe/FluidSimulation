@@ -92,7 +92,7 @@ public class Smoke implements GLEventListener
 //		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
 //		RigidEllipse rb2 = new RigidEllipse(new Point2d(40,70), new Vector2d(0.0,0.0), 0, 0, 10, 6, 3);
 //		RigidDisk rb2 = new RigidDisk(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
-		RigidEllipse2 rb2 = new RigidEllipse2(new Point2d(50,90), new Vector2d(0.0,0.0), -1.5, 0, 5, 8, 2);
+		RigidEllipse2 rb2 = new RigidEllipse2(new Point2d(30,90), new Vector2d(0.0,-1.0), -1., 0, 10, 3, 2);
 //		RigidHalfEllipse rb2 = new RigidHalfEllipse(new Point2d(50,90), new Vector2d(0.0,0.0), -1.5, 0, 2, 8, 4);
 
 
