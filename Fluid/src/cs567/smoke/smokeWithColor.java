@@ -676,9 +676,9 @@ public class smokeWithColor implements GLEventListener
 		try{
 			System.out.println("Smoke! \nUSAGE: args[k] = k'th keyframe image filename");
 			String[] imageKeyframes = {
+					"images/Cornell-logo1.jpg",
 					"images/cornellLogo.png", 
 					"images/yinYang2.png",
-					"images/Cornell-logo1.jpg",
 			};
 			if(args.length > 0)  imageKeyframes = args;
 			System.out.println("Images: "+(Arrays.asList(imageKeyframes)));

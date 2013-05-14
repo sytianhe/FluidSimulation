@@ -135,7 +135,7 @@ public class SmokeControlForces
 		for (int i = 0; i<size; i++){
 			if(rho[i]>0.1){
 //				rho[i] *= 1f+(rhoGoalSum -rhoSum)/rhoSum;  //More natural approach but seems to not give the 
-				rho[i] += (this.keyframe.rhoGoal[i] -rho[i])/10;  //A little hacky but it gets the job done
+				rho[i] += (this.keyframe.rhoGoal[i] -rho[i])/1000;  //A little hacky but it gets the job done
 			}
 		}
 	}
