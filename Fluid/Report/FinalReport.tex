@@ -149,8 +149,10 @@ The provided base code comes complete with a simple Gauss-Seidel iterative linea
 \subsection{Rigid Bodies}
 Toward the support of arbitrary seed dynamics simulation, we provide general support for  shapes parametrizable by a radial function $r(\theta)$.   The implementation is provided in the \textbf{RigidPolarShape} class. Assuming that \textbf{radialFunction(theta)} is specified in a child class, this class computes basic physical quantities such as total mass, moment of inertia, etc by direct numerical integration.  This class also handles percent cell inclusion computations  ( $w$from Section 2.2). 
 
-Arbitrary shape support is hard, so we are in one sense settling.  At the same time, the space of shapes parametrized by radial function is actually quite general.  In addition it comes with a natural set of basis functions.  By selecting a particular set of principle basis functions, we are well suited to sample the shape space in a principled way.     
+Arbitrary shape support is hard, so we are in one sense settling.  At the same time, the space of shapes parametrized by radial function is actually quite general.  In addition it comes with a natural set of basis functions.  By selecting a particular set of principle basis functions, we are well suited to sample the shape space in a principled way.  
 
+\subsection{Colorful Smoke}   
+To make our smoke look interesting, we also implemented a colorful smoke. The idea is that instead of just solve the grayscale density, we run the solver three times to solve the RGB densities separately. In order to do that, we changed the \textbf{SmokeKeyframe} function so that it retrieves the RGB data from the target figure. 
 
 \pagebreak
 \section{Experiment and Results}
@@ -171,7 +173,7 @@ We will not stress the precise numerical details of the simulation. But it is wo
 
 Just for fun, we provide a few plots of our data in Fig~1 and Fig~2.  As hinted at above, both plots indicate a transition point in behavior near eccentricity of 0.5.  In the first plot, 
 
-\begin{widepage}
+
 \begin{figure}
 \begin{center}
 \includegraphics[width=300pt]{fig1.jpg}
@@ -179,7 +181,7 @@ Just for fun, we provide a few plots of our data in Fig~1 and Fig~2.  As hinted 
 \label{default}
 \end{center}
 \end{figure}
-\end{widepage}
+%\end{widepage}
  
 
 

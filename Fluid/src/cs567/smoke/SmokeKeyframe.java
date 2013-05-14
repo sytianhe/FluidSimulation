@@ -104,7 +104,6 @@ public class SmokeKeyframe
 		size = N*N;/// NUMBER OF PIXELS
 
 		/// LOAD & RESAMPLE IMAGE FOR DENSITY KEYFRAME (rhoGoal):
-		//rhoGoal = loadKeyframeDensity(imageFilename);
 		rhoGoal = loadKeyframeDensityRGB(imageFilename, RGB);
 
 
