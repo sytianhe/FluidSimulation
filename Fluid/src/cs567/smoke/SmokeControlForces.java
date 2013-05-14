@@ -133,9 +133,9 @@ public class SmokeControlForces
 		float rhoGoalSum  = this.keyframe.rhoGoalSum;
 		float rhoSum = Utils.sum(rho);
 		for (int i = 0; i<size; i++){
-			if(rho[i]>0.1){
+			if(rho[i]>0.01){
 //				rho[i] *= 1f+(rhoGoalSum -rhoSum)/rhoSum;  //More natural approach but seems to not give the 
-				rho[i] += (this.keyframe.rhoGoal[i] -rho[i])/100;  //A little hacky but it gets the job done
+				rho[i] += (this.keyframe.rhoGoal[i] -rho[i])/1000;  //A little hacky but it gets the job done
 			}
 		}
 	}

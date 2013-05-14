@@ -59,7 +59,7 @@ One of the most interesting features of a simulation based approach to understan
 
 Further, we may sample the space of all possible seed morphologies to generate a complete map of flight characteristics.  In this way, we can generate a complete fitness landscape of seed morphology.\footnote{In reality, the fitness landscape for wind dispersed seeds is measured not only by how far a seed travels, but also by how often a seed falls in a habitable zone.  The distance plays an important role in the long term survival of the species, but the later is necessary for successful germination.}   While such a perspective is out of reach for most biological phenomena, the distinctly physical nature of wind based seed dispersion provides a unique glimpse into the diverse space of possible morphologies and the evolutionary pathways that connect them.   
 
-Given this project's relative infancy, we do not consider the research agenda described above in all it's glory, but instead focus instead on the simplified case of 2D dispersion of elliptic shapes.  Even in this simplified version of the problem, we observe subtle variations in shape and behavior, in support of the   This experiment and preliminary results are discussed in section 3.  
+Given this project's relative infancy, we do not consider the research agenda described above in all it's glory, but instead focus instead on the simplified case of 2D dispersion of elliptic shapes.  Even in this simplified version of the problem, we observe subtle variations in shape and behavior.  This experiment and preliminary results are discussed further in Section 3.  
 
 
 
@@ -113,7 +113,7 @@ $$\mathbf{u}^{n+1} = (1-\mathit{w})\hat{\mathbf{u}} + \mathit{w}\hat{\mathbf{u}}
 In our implementation, we go through each cell in the grid two times. The first time, we find out $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ by cumulating $\rho_i \hat{\mathbf{u}} dg_i$ and $\mathbf{r}_i \times \rho_i \hat{\mathbf{u}} dg_i$ at each cell. The second time, we use the calculated $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ to compute $ \hat{\mathbf{u}}_R $ and to update the new velocity $\mathbf{u}^{n+1}$ .
 
 \subsection{Stable Solver}
-The provided base code comes complete with a simple Gauss-Seidel iterative linear solver. To improve the performance of the fluid solver, we implemented the Preconditioned Conjugate Gradient (PCG) linear solver. Pseudo code for this method is provide in Algorithm~$\ref{alg1}$ \cite{kincaid2002}.  In the interest of time we use the simplest  pre--conditioner:  $Q = \text{diag}(M)$.  At present, this pre--conditioner yields  marginal improvements over the provided .  Preconditioning with something like the Incomplete Cholesky factorization of A would be preferable.  
+The provided base code comes complete with a simple Gauss-Seidel iterative linear solver. To improve the performance of the fluid solver, we implemented the Preconditioned Conjugate Gradient (PCG) linear solver. Pseudo code for this method is provide in Algorithm \ref{alg1}  \cite{kincaid2002}.  In the interest of time we use the simplest  pre--conditioner:  $Q = \text{diag}(M)$.  At present, this pre--conditioner yields  marginal improvements over the provided .  Preconditioning with something like the Incomplete Cholesky factorization of A would be preferable.  
 
 \begin{algorithm}
 \caption{Preconditioned Conjugate gradient algorithm }
@@ -163,18 +163,18 @@ We perform a 2D version of the experiment described at the end of Section 1 usin
 \item Measure: average velocity, terminal velocity, average horizontal displacement , max  horizontal displacement, final position, etc.  
 \item Continue...
 \end{enumerate}  
-See the  main program \textbf{Seed Drop} for implementation details, or to try it out for yourself.    
+See the  main program \textbf{SeedDrop} for implementation details, or to try it out for yourself.    
 
 In our principle experimental run, we simulated forty different shapes and for each shape performed ten drops at relative density 10.  Sampling is performed according to :
 $$ a = 4 + 4*\text{rand} \;\;\; \text{and} \;\;\; b= 1+ 3*\text{rand} $$
 where $a$ is the major axis and $b$ is the minor axis.  Some date from preliminary trials is given in the Data directory.   Movies for a few of these trials can be found in the Artifacts Directory.  
 
-We will not stress the precise numerical details of the simulation. But it is worth observing that the various trials demonstrates two principle modes of behavior: fluttering and tumbling.    In two dimensions, these are the only modes of falling. And which mode a given shape lies in has dramatic  implications for the particular characteristics of the fall.  For instance, tumbling behavior supports significant horizontal displacement where as fluttering behavior tends to leave the falling shape roughly where it started.  More interesting is that the shapes which exhibit tumbling seem to lie in an intermediate range in the space of ellipses, with eccentricity on the order of 0.5. .   
+We will not stress the precise numerical details of the simulation. But it is worth observing that the various trials demonstrates two principle modes of behavior: fluttering and tumbling.    In two dimensions, these are the only modes of falling. And which mode a given shape lies in has dramatic  implications for the particular characteristics of the fall.  For instance, tumbling behavior supports significant horizontal displacement where as fluttering behavior tends to leave the falling shape roughly where it started.  More interesting is that the shapes which exhibit tumbling seem to lie in an intermediate range in the space of ellipses, with eccentricity on the order of 0.5.  
 
-Just for fun, we provide a few plots of our data in Fig~1 and Fig~2.  As hinted at above, both plots indicate a transition point in behavior near eccentricity of 0.5.  In the first plot, 
+Just for fun, we provide a few plots of our data in Fig~1 and Fig~2.  As hinted at above, both plots indicate a curious transition point in behavior near eccentricity of 0.5.  The first plot, indicates that  flutter/tumbling is maximal near this critical point. The second plot, depicts an abrupt drop in average velocity at this critical point.   
 
 \section{Conclusion}
-We have described a simulation based approach  for quantifying the aerodynamics of random 2D shapes.  In the context of plan seed dispersoin, this approach provides for an (approximate) global understanding of the fitness landscape for seed morphology.  While we only present preliminary results as  proof of concept, it is our ho[e that  extensions of this  approach will provide new understanding of seed morphology, dispersal, population dynamics, and evolution.
+We have described a simulation based approach  for quantifying the aerodynamics of random 2D shapes.  In the context of plan seed dispersion, this approach provides for an (approximate) global understanding of the fitness landscape for seed morphology.  While we only present preliminary results as  proof of concept, they already  hint at a surprising landscape of behavior across shapes.  It is our hope that  extensions of this  approach will provide new understanding of seed morphology, dispersal, population dynamics, and evolution.
 
 \nocite{*}
 \bibliographystyle{acmsiggraph}
