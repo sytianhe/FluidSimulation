@@ -7,14 +7,10 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
@@ -24,7 +20,6 @@ import javax.swing.JFrame;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector2f;
-import javax.vecmath.Vector3f;
 
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.awt.Screenshot;
@@ -70,29 +65,12 @@ public class Smoke implements GLEventListener
 	boolean drawWireframe = false;
 
 	FluidSolver fs;
-	FluidSolver fsR;
-	FluidSolver fsG;
-	FluidSolver fsB;
-	
 	ArrayList <RigidBody> rbs;
 
 	MyMouseHandler mouseHandler;
 
 	SmokeControlForces control;
-	SmokeControlForces controlR;
-	SmokeControlForces controlG;
-	SmokeControlForces controlB;
-
 	SmokeKeyframe[]    keyframes;
-	SmokeKeyframe[]    keyframesR;
-	SmokeKeyframe[]    keyframesG;
-	SmokeKeyframe[]    keyframesB;
-	
-	ArrayList <Vector3f> colorCollection;
-	Vector3f currentColor;
-	int currentColorIndex;
-	
-	BufferedImage image;
 
 	/** 
 	 * Main constructor. Call start() to begin simulation. 
@@ -104,90 +82,33 @@ public class Smoke implements GLEventListener
 		if(imageKeyframes.length < 1) throw new NullPointerException("No image keyframes");
 
 		fs = new FluidSolver(); /// <<-- PARAMETERS IN "Constants" CLASS
-		fsR = new FluidSolver(); /// <<-- PARAMETERS IN "Constants" CLASS
-		fsG = new FluidSolver(); /// <<-- PARAMETERS IN "Constants" CLASS
-		fsB = new FluidSolver(); /// <<-- PARAMETERS IN "Constants" CLASS
-
 
 		control = new SmokeControlForces();
-		controlR = new SmokeControlForces();
-		controlG = new SmokeControlForces();
-		controlB = new SmokeControlForces();
-
 		loadKeyframes(imageKeyframes);
 		control.setKeyframe(keyframes[0]);
-		controlR.setKeyframe(keyframesR[0]);
-		controlG.setKeyframe(keyframesG[0]);
-		controlB.setKeyframe(keyframesB[0]);
-
 		fs.setSmokeControl(control);
-		fsR.setSmokeControl(controlR);
-		fsG.setSmokeControl(controlG);
-		fsB.setSmokeControl(controlB);
-
 		fs.setNumerofFrame(N_STEPS_PER_FRAME);
-		fsR.setNumerofFrame(N_STEPS_PER_FRAME);
-		fsG.setNumerofFrame(N_STEPS_PER_FRAME);
-		fsB.setNumerofFrame(N_STEPS_PER_FRAME);
 
-		
-		// Set up colors
-		currentColorIndex = 0;
-		colorCollection = new ArrayList <Vector3f>();
-		colorCollection.add(new Vector3f(1f, 1f, 1f));
-		colorCollection.add(new Vector3f(186f/256f, 85f/256f, 211f/256f));
-		colorCollection.add(new Vector3f(255f/256f, 250f/256f, 205f/256f));
-		colorCollection.add(new Vector3f(240f/256f, 255f/256f, 240f/256f));
-		colorCollection.add(new Vector3f(240f/256f, 255f/256f, 255f/256f));
-		colorCollection.add(new Vector3f(255f/256f, 240f/256f, 245f/256f));
-		colorCollection.add(new Vector3f(132f/256f, 112f/256f, 255f/256f));
-		colorCollection.add(new Vector3f(0f/256f, 255f/256f, 255f/256f));
-		colorCollection.add(new Vector3f(127f/256f, 255f/256f, 0f/256f));
-		colorCollection.add(new Vector3f(173f/256f, 255f/256f, 47f/256f));
-		colorCollection.add(new Vector3f(255f/256f, 255f/256f, 255f/256f));
-		colorCollection.add(new Vector3f(255f/256f, 0f/256f, 0f/256f));
-		currentColor = new Vector3f(1f,1f,1f);
-
-
-		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
+//		RigidCircle rb1 = new RigidCircle(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
 //		RigidEllipse rb2 = new RigidEllipse(new Point2d(40,70), new Vector2d(0.0,0.0), 0, 0, 10, 6, 3);
 //		RigidDisk rb2 = new RigidDisk(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 5);
-//		RigidEllipse2 rb2 = new RigidEllipse2(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 2.0, 0.25);
+
+		RigidEllipse2 rb2 = new RigidEllipse2(new Point2d(50,90), new Vector2d(0.0,0.0), 0, 0, 1.5, 2.0, 1);
 //		RigidHalfEllipse rb2 = new RigidHalfEllipse(new Point2d(50,90), new Vector2d(0.0,0.0), -1.5, 0, 2, 8, 4);
+
 
 		rbs = new ArrayList<RigidBody>();
 //		rbs.add(rb1);
-//		rbs.add(rb2);
+		rbs.add(rb2);
 		fs.addRigidBodies(rbs);	
-		
-		File file = new File("images/flower2.jpg");		
-		image = ImageIO.read(file);
-		
-//		int color = image.getRGB(10, 10);
-//
-//		int  red = (color & 0x00ff0000) >> 16;
-//		int  green = (color & 0x0000ff00) >> 8;
-//		int  blue = color & 0x000000ff;
-//		
-//		System.out.println("R color: "+ red);
-//		System.out.println("G color: "+ green);
-//		System.out.println("B color: "+ blue);
-
 	}
 
 	/** Loads/Constructs "keyframes" */
 	private void loadKeyframes(String[] imageFilenames) throws IOException
 	{
 		keyframes = new SmokeKeyframe[imageFilenames.length];
-		keyframesR = new SmokeKeyframe[imageFilenames.length]; 
-		keyframesG = new SmokeKeyframe[imageFilenames.length];
-		keyframesB = new SmokeKeyframe[imageFilenames.length];
-		for(int k=0; k<imageFilenames.length; k++) {
-			keyframes[k] = new SmokeKeyframe(imageFilenames[k], 0);
-			keyframesR[k] = new SmokeKeyframe(imageFilenames[k], 0); //RED
-			keyframesG[k] = new SmokeKeyframe(imageFilenames[k], 1); //GREEN
-			keyframesB[k] = new SmokeKeyframe(imageFilenames[k], 2); //BLUE
-		}	
+		for(int k=0; k<imageFilenames.length; k++) 
+			keyframes[k] = new SmokeKeyframe(imageFilenames[k]);
 	}
 
 	/**
@@ -321,13 +242,6 @@ public class Smoke implements GLEventListener
 			for(int s=0; s<N_STEPS_PER_FRAME; s++) {
 				fs.velocitySolver();/// <<<-- with control forces
 				fs.densitySolver();
-				
-				fsR.velocitySolver();/// <<<-- with control forces
-				fsR.densitySolver();
-				fsG.velocitySolver();/// <<<-- with control forces
-				fsG.densitySolver();
-				fsB.velocitySolver();/// <<<-- with control forces
-				fsB.densitySolver();
 			}
 		}
 
@@ -355,9 +269,6 @@ public class Smoke implements GLEventListener
 			}
 			gl.glEnd();
 		}
-		
-		int width = image.getWidth();
-		int height = image.getHeight();
 
 		if(true) {//DRAW RASTER:
 
@@ -369,29 +280,14 @@ public class Smoke implements GLEventListener
 				float y = row * h;
 
 				for(int i=0; i<=n+1; i++) {
-					
-					int xx = (int) (row * 1.0 /N * width);
-					int yy = (int) (i * 1.0 /N * height);
-					int pixel = image.getRGB(xx, yy);
-					
-					/* getRGB() returns an ARGB-packed int */
-					int alpha = (pixel >> 24) & 0xff;
-					int red   = 256;//(pixel >> 16) & 0xff;
-					int green = 256;//(pixel >> 8)  & 0xff;
-					int blue  = 256;//(pixel >> 0)  & 0xff;
-					
 					float x = (i - 0.5f) * h;
 
-					float d = getDrawDensityRGB(i,row, 0);
-					//gl.glColor3f(d * currentColor.x, d * currentColor.y, d * currentColor.z);
-					//gl.glColor3f(d * red / 256f, d * green / 256f, d * blue / 256f);
-					gl.glColor3f(getDrawDensityRGB(i, row, 0), getDrawDensityRGB(i, row, 1), getDrawDensityRGB(i, row, 2));
+					float d = getDrawDensity(i,row);
+					gl.glColor3f(d, d, d);
 					gl.glVertex2f(x, y);
 
-					d = getDrawDensityRGB(i,row+1, 0);
-					//gl.glColor3f(d * currentColor.x, d * currentColor.y, d * currentColor.z);
-					//gl.glColor3f(d * red / 256f, d * green / 256f, d * blue / 256f);
-					gl.glColor3f(getDrawDensityRGB(i, row+1, 0), getDrawDensityRGB(i, row+1, 1), getDrawDensityRGB(i, row+1, 2));
+					d = getDrawDensity(i,row+1);
+					gl.glColor3f(d, d, d);
 					gl.glVertex2f(x, y+h);
 				}
 				gl.glEnd();
@@ -454,25 +350,6 @@ public class Smoke implements GLEventListener
 		return d;
 	}
 
-	private float getDrawDensityRGB(int i, int j, int rgb) { 
-		float d = 0;
-		if (rgb == 0){
-			d = 2*fsR.getDensity(i,j);///arbitrary scaling
-		}
-		else if (rgb == 1){
-			d = 2*fsG.getDensity(i,j);///arbitrary scaling
-		}
-		else if (rgb == 2){
-			d = 2*fsB.getDensity(i,j);///arbitrary scaling
-		}
-		else{
-			System.out.println("Wrong index!!!");
-		}
-		
-		if(d < 0) d=0;
-		return d;
-	}
-	
 	/** 
 	 * Modify this class to improve mouse interaction.
 	 */ 
@@ -515,39 +392,12 @@ public class Smoke implements GLEventListener
 				fs.dOld[fs.I(i-1, j)] = cb; 
 				fs.dOld[fs.I(i, j-1)] = cb; 
 				fs.dOld[fs.I(i, j+1)] = cb; 
-				
-				fsR.dOld[fs.I(i, j)]   = c;
-				fsR.dOld[fs.I(i+1, j)] = cb; 
-				fsR.dOld[fs.I(i-1, j)] = cb; 
-				fsR.dOld[fs.I(i, j-1)] = cb; 
-				fsR.dOld[fs.I(i, j+1)] = cb;
-				
-				fsG.dOld[fs.I(i, j)]   = c;
-				fsG.dOld[fs.I(i+1, j)] = cb; 
-				fsG.dOld[fs.I(i-1, j)] = cb; 
-				fsG.dOld[fs.I(i, j-1)] = cb; 
-				fsG.dOld[fs.I(i, j+1)] = cb;
-				
-				fsB.dOld[fs.I(i, j)]   = c;
-				fsB.dOld[fs.I(i+1, j)] = cb; 
-				fsB.dOld[fs.I(i-1, j)] = cb; 
-				fsB.dOld[fs.I(i, j-1)] = cb; 
-				fsB.dOld[fs.I(i, j+1)] = cb;
 			}
 
 			/// ADD VELOCITY/FORCE (should scale by DT)
 			if (button == 3) {
 				fs.uOld[fs.I(i, j)] = (float)(p.x - pOld.x) * 500000;
 				fs.vOld[fs.I(i, j)] = (float)(p.y - pOld.y) * 500000;
-				
-				fsR.uOld[fs.I(i, j)] = (float)(p.x - pOld.x) * 500000;
-				fsR.vOld[fs.I(i, j)] = (float)(p.y - pOld.y) * 500000;
-				
-				fsG.uOld[fs.I(i, j)] = (float)(p.x - pOld.x) * 500000;
-				fsG.vOld[fs.I(i, j)] = (float)(p.y - pOld.y) * 500000;
-
-				fsB.uOld[fs.I(i, j)] = (float)(p.x - pOld.x) * 500000;
-				fsB.vOld[fs.I(i, j)] = (float)(p.y - pOld.y) * 500000;
 			}
 		}
 
@@ -578,9 +428,6 @@ public class Smoke implements GLEventListener
 			simulate = false;
 			frameExporter = null;
 			fs.reset();
-			fsR.reset();
-			fsG.reset();
-			fsB.reset();
 		}
 		else if (key == 'w') {//RESET
 			System.out.println("WIREFRAME");
@@ -613,26 +460,12 @@ public class Smoke implements GLEventListener
 			frameExporter = ((frameExporter==null) ? (new FrameExporter()) : null);
 			System.out.println("'e' : frameExporter = "+frameExporter);
 		}
-		else if (key == 'q') {//change colors
-			if (currentColorIndex < colorCollection.size()-1){
-				currentColorIndex += 1;
-				currentColor = colorCollection.get(currentColorIndex);
-			}
-			else{
-				currentColorIndex = 0;
-				currentColor = colorCollection.get(currentColorIndex);
-			}
-		}
 		else {
 
 			for(int k=0; k<keyframes.length; k++) {
 				if(key == (new String(""+(k+1))).charAt(0)) {
 					//System.out.println("KEY: "+key);
 					control.setKeyframe(keyframes[k]); 
-					controlR.setKeyframe(keyframesR[k]); 
-					controlG.setKeyframe(keyframesG[k]); 
-					controlB.setKeyframe(keyframesB[k]); 
-
 				}
 			}
 		}
@@ -688,12 +521,14 @@ public class Smoke implements GLEventListener
 	{
 		try{
 			System.out.println("Smoke! \nUSAGE: args[k] = k'th keyframe image filename");
-			String[] imageKeyframes = {
-					"images/cornellLogo.png", 
-					"images/yinYang2.png",
-			"images/Cornell-logo1.jpg",
-			"images/fish.png"
-			};
+			String[] imageKeyframes = {"images/C.png",
+					"images/O.png",
+					"images/R.png",
+					"images/N.png",
+					"images/E.png",
+					"images/L.png",
+					"images/yinYang.gif",
+			"images/cornellLogo.png"};
 			if(args.length > 0)  imageKeyframes = args;
 			System.out.println("Images: "+(Arrays.asList(imageKeyframes)));
 

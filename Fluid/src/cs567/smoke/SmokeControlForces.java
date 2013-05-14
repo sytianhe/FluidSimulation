@@ -89,15 +89,15 @@ public class SmokeControlForces
 				float g_Y = ( (rho[I(i,j+1)] - rhoGoal[I(i,j+1)])   -  (rho[I(i,j)] - rhoGoal[I(i,j)]) ) / 1f ;
 
 //				// DIFFUSION COEFF (AVERAGE ON EDGES, x,y,X,Y):
-				float D_x = ( (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) + (rho[I(i-1,j)] * rhoGoalBlur[I(i-1,j)]) ) / 2f ;
-				float D_X = ( (rho[I(i+1,j)] * rhoGoalBlur[I(i+1,j)]) + (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) ) / 2f ;
-				float D_y = ( (rho[I(i,j)] * rhoGoalBlur[I(i,j)])   +  (rho[I(i,j-1)] * rhoGoalBlur[I(i,j-1)]) ) / 2f ;
-				float D_Y = ( (rho[I(i,j+1)] * rhoGoalBlur[I(i,j+1)])   + (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) ) / 2f ;
+//				float D_x = ( (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) + (rho[I(i-1,j)] * rhoGoalBlur[I(i-1,j)]) ) / 2f ;
+//				float D_X = ( (rho[I(i+1,j)] * rhoGoalBlur[I(i+1,j)]) + (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) ) / 2f ;
+//				float D_y = ( (rho[I(i,j)] * rhoGoalBlur[I(i,j)])   +  (rho[I(i,j-1)] * rhoGoalBlur[I(i,j-1)]) ) / 2f ;
+//				float D_Y = ( (rho[I(i,j+1)] * rhoGoalBlur[I(i,j+1)])   + (rho[I(i,j)] * rhoGoalBlur[I(i,j)]) ) / 2f ;
 
-//				float D_x = ( (rho[I(i,j)]   + rho[I(i-1,j)] ) /2f ) * ( ( rhoGoalBlur[I(i,j)]    + rhoGoalBlur[I(i-1,j)]) / 2f ) ;
-//				float D_X = ( (rho[I(i+1,j)] + rho[I(i,j)] ) /2f   ) * ( ( rhoGoalBlur[I(i+1,j)]  + rhoGoalBlur[I(i,j)])   / 2f ) ;
-//				float D_y = ( (rho[I(i,j)]   + rho[I(i,j-1)] ) /2f ) * ( ( rhoGoalBlur[I(i,j)]    + rhoGoalBlur[I(i,j-1)]) / 2f ) ;
-//				float D_Y = ( (rho[I(i,j+1)] + rho[I(i,j)]   ) /2f ) * ( (rhoGoalBlur[I(i,j+1)]   + rhoGoalBlur[I(i,j)])   / 2f ) ;
+				float D_x = ( (rho[I(i,j)]   + rho[I(i-1,j)] ) /2f ) * ( ( rhoGoalBlur[I(i,j)]    + rhoGoalBlur[I(i-1,j)]) / 2f ) ;
+				float D_X = ( (rho[I(i+1,j)] + rho[I(i,j)] ) /2f   ) * ( ( rhoGoalBlur[I(i+1,j)]  + rhoGoalBlur[I(i,j)])   / 2f ) ;
+				float D_y = ( (rho[I(i,j)]   + rho[I(i,j-1)] ) /2f ) * ( ( rhoGoalBlur[I(i,j)]    + rhoGoalBlur[I(i,j-1)]) / 2f ) ;
+				float D_Y = ( (rho[I(i,j+1)] + rho[I(i,j)]   ) /2f ) * ( (rhoGoalBlur[I(i,j+1)]   + rhoGoalBlur[I(i,j)])   / 2f ) ;
 				
 				// DIV (D GRAD(rho-rhoGoal)) (USING EDGE-BASED H=D GRAD(...)):
 				// rate[I(i,j)] = Constants.V_g * (  (D_X * g_X - D_x * g_x ) /1f + (D_Y * g_Y - D_y * g_y ) /1f );
@@ -133,8 +133,9 @@ public class SmokeControlForces
 		float rhoGoalSum  = this.keyframe.rhoGoalSum;
 		float rhoSum = Utils.sum(rho);
 		for (int i = 0; i<size; i++){
-			if(rho[i]>0){
-				rho[i] *= 1f+(rhoGoalSum -rhoSum)/rhoSum/100f;
+			if(rho[i]>0.1){
+//				rho[i] *= 1f+(rhoGoalSum -rhoSum)/rhoSum;  //More natural approach but seems to not give the 
+				rho[i] += (this.keyframe.rhoGoal[i] -rho[i])/10;  //A little hacky but it gets the job done
 			}
 		}
 	}

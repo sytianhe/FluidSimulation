@@ -13,8 +13,6 @@ import javax.vecmath.Vector2d;
  */
 public class RigidPolarShape extends RigidBody {
 	
-	double maxRadius;
-
 	public RigidPolarShape(Point2d centerOfMass, Vector2d LinVel, double theta,
 		double AngVel, double d) {
 		super(centerOfMass, LinVel, theta, AngVel, d);
@@ -74,36 +72,47 @@ public class RigidPolarShape extends RigidBody {
 	
 	
 	@Override
-	/** Return the w ratio for cell (i,j) 
-	 *  Kindof inefficient...oh well.
-	 */
+	/** Return the w ratio for cell (i,j). */
 	public double wRatio (int row, int column){
 		
-		int numSample = 4;
+		int numSample = 6;
 		int counter = 0;
 		Vector2d sep = new Vector2d();
 		
-		for (int i=0; i<numSample; i++){
-			for(int j=0; j<numSample; j++){
-				sep.set(row + (i+0.5)/numSample,  column + (j+0.5)/numSample);
-				sep.sub(x);
-				this.transformW2B(sep);
-				double angle = Math.atan2(sep.y, sep.x);
-				double r = radialFunction(angle);
-				if (sep.length() <= r){
-					counter +=1;
+		sep.set(row + 0.5,  column + 0.5);
+		sep.sub(x);
+		transformW2B(sep);
+		double angle = Math.atan2(sep.y, sep.x);
+		double r = radialFunction(angle);
+		if (sep.length() < r - 3){
+			return 1;
+		}
+		else if(sep.length() > r + 3){
+			return 0;
+		}
+		else{
+			//Perform subsampleing to near the boundary
+			for (int i=0; i<numSample; i++){
+				for(int j=0; j<numSample; j++){
+					sep.set(row + (i+0.5)/numSample,  column + (j+0.5)/numSample);
+					sep.sub(x);
+					this.transformW2B(sep);
+					angle = Math.atan2(sep.y, sep.x);
+					r = radialFunction(angle);
+					if (sep.length() <= r){
+						counter +=1;
+					}
 				}
 			}
-		}
-		
-		return counter * 1.0/(numSample*numSample);
+			return counter * 1.0/(numSample*numSample);
+		}		
 	}
 	
 	@Override
 	public void applyConstraintForces() {
 		/// APPLY SIMPLY PENALTY FORCE TO KEEP SHAPE FROM FALLING THROUGH THE FLOOR:
 		double penDepth = 0.1 - (x.y-maxRadius);
-		if(penDepth > 0) {//overlap
+		if(penDepth > 0) {
 			/// PENALTY CONTACT FORCE:
 			double k     = Constants.CONTACT_STIFFNESS * mass;
 			double f =  k * penDepth;
@@ -115,10 +124,18 @@ public class RigidPolarShape extends RigidBody {
 		}
 	}
 
+	/** Restrict angle to [0,2pi). */
+	public double modAngle(double angle)
+	{
+	    double newAngle = angle;
+	    while (newAngle < 0) newAngle += 2* Math.PI;
+	    while (newAngle >= 2*Math.PI) newAngle -= 2* Math.PI;
+	    return newAngle;
+	}
 	
 	
 	@Override
-	/**  Display disk  */
+	/**  Display  */
 	public synchronized void display(GL2 gl){
 		/// SETUP TRANSFORM: 
 		gl.glPushMatrix();

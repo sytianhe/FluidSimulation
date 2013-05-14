@@ -34,23 +34,47 @@
 \maketitle
 
 \begin{abstract}
-Wind dispersal of  seeds is an important mechanism for mobility in many plant species.  Unlike other dispersal mechanisms, wind dispersal is chiefly a function of seed morphology.  Primarily isolated from the  complex ecology of the plant's environment during this critical stage of a life, physical simulation provides a way to  quantify the fitness of different seed morphologies .   As a first step toward this quantification, we  implement a  framework for stable 2D fluid simulation with rigid body coupling.
+Wind dispersal of  seeds is an important mechanism of mobility in many plant species.  Unlike other seed dispersal mechanisms , wind dispersal is chiefly a function of seed morphology.  Primarily isolated from the  complex ecology of the plant's environment during this critical stage of a life, physical simulation provides a way to  quantify the fitness of different seed morphologies .   As a first step toward this quantification, we  implement a  framework for stable 2D fluid simulation with  coupling to radially parametrized rigid bodies via the stable fluid method.   We demonstrate that these simulation methods are capable of generating plausible flight behavior such as fluttering and tumbling, critical to 2D dispersion.   Using this framework we perform random sampling of different shapes to obtain preliminary data on the distribution of various flight characteristics. 	 
 \end{abstract}
 
 \keywordlist
 
 \copyrightspace
 
-\section{Overview}
+\section{Biological Overview }
+(Note: This biological overview is an abridged  version of that described in our original project proposal. )
+\\ 
+\\
+Dispersion is the process by which an organism moves away from its place of birth.  This process is central to understanding  population structure and dynamics, gene-flow, evolution and speciation, as well as many other biological phenomena \cite{levin1989}.   In general, the mechanism for dispersion is difficult to model precisely. An organism may be mobile for its entire life, and its motions may be dictated by complicated behavior and interactions with other species.  For sessile organisms, the dispersal process is often restricted to a single phase in the organism's life in which the organism is essentially passive \cite{nathan2000}.   Such organisms lend themselves to more precise understanding of the dispersal process.  
+
+Seed plants serve as a model species for studying dispersal. Even as a passive agent, the mechanisms behind seed dispersal can be surpassingly complex \cite{wilson2000}.  Fruits, which beer a seed at their center, are dispersed by frugivors, typically as a result of being eaten and later expelled with the fecal matter.  While the seed remains passive, the dispersal process is strongly coupled  to the complex behavior of the carrier, making precise modeling difficult.   In contrast, wind dispersal is an entirely physical process, predominately decoupled from complex biological interactions.    
+
+Wind dispersed seeds have been studied previously through empirical analysis of seed morphology and flight characteristics \cite{augspurger1986}.  This work has been applied to  theoretical ballistic and plum models  to obtain plausible explanations for spatial population dynamics and pattern formation \cite{levin2003}. Recent work has also considered  evolutionary implications of spatial segregation of  plant species as a result of wind dispersal by looking at phenotypic changes across  populations \cite{Cheptou2008}.   A theoretical investigation of dispersal driven speciation is carried out in \cite{levin2010}. 
+
+This research together  describes a closed cycle in a biological story: seed morphology determines  dispersal, dispersal determines spatial population dynamics, spatial population dynamics determine genetic mixing, and genetic mixing determines new seed morphology.\footnote{In reality, this simple story of dispersion driven evolution is complicated by several factors. Seed morphology  plays an important  role in  other stages in a plant's life cycle. Seed size, for instance, influences germination success rate.  Inter-species competition effects  the evolution of plant characteristics.   Though seed morphology may not be effected directly, parameters coupled to dispersal, such as plant height and population density will be.  Finally, seed fitness is measured not by dispersive capacity, but by maximizing the likelihood that  seeds land in suitable habitat for germination.  But the distribution of suitable habitats is strongly affected population level competition. }  
+
+Understanding how phenotypic changes to seed shape affect  flight characteristics remain a difficult but important challenge to the field, providing a link between phenotypic variation and dispersive outcome.  Some success has been achieved by construction low-dimensional flight models based on classical aerodynamic theory \cite{greene2005}.  However, careful physical modeling and simulation reveals that natural structures exhibit behavior that is not accurately described by aerodynamic theory, and instead depends on a full consideration of fluid and rigid-body coupling \cite{wang2005}\cite{wang2012}.   Given the tremendous increase in computing power and speed,  precise physical simulation is a viable approach to the problem.
+
+One of the most interesting features of simulation based approach to understanding flight characteristics is that it allows us to consider seed shapes not observed in nature.  This flexibility allows us to consider a number of problems that would be otherwise difficult to approach.  For instance, by looking at flight characteristics of seed shapes similar to those observed in nature, we can asses local stability and optimality of reel seeds.
+
+Further, we may sample the space of all possible seed morphologies to generate a complete map of flight characteristics.  In this way, we can generate a complete fitness landscape of seed morphology.\footnote{Here the fitness landscape for wind dispersed seeds is measured not only by how far a seed travels, but also by how often a seed falls in a habitable zone.  The distance plays an important role in the long term survival of the species, but the later is necessary for successful germination.}   While such a perspective is out of reach for most biological phenomena, the distinctly physical nature of wind based seed dispersion provides a unique glimpse into the diverse space of possible morphologies and the evolutionary pathways that connect them.  
 
 
 \section{Technical Description}
-\subsection{Fluid (Smoke)}
-We used the smoke based code for the to simulate the fluid. Followed the architecture outlined in \cite{fattal2004}, we implemented the driving forces and gathering forces to make the smoke function. For the gathering force, we implemented the equation proposed in the paper:
-$$ \mathbf{G}(\mathbf{\rho}, \mathbf{\rho}^*)  = \nabla \cdot [\mathbf{\rho} \tilde{\mathbf{\rho}}^* \nabla(\mathbf{\rho} - \mathbf{\rho}^*)]$$
-We also used MAC grid when we calculate the gradient.
 
-One of the problem of this method is that the smoke does not preserve. To fix this, we implemented the \texttt{normalizeDensity()} function, which maintains the density sum equal to the sum of keyframe density.
+\subsection{Fluid (Smoke)}
+Our fluid simulation implementation is based on the source code provided for smoke simulation and control. Though not entirely relevant to our  goal of simulating seed dispersion, we began by implementing various features of the smoke control project.  Followed the  \cite{fattal2004}, we included a gathering force $G$ to make the smoke converged to keyframe density:
+$$ \mathbf{G}(\mathbf{\rho}, \mathbf{\rho}^*)  = \nabla \cdot [\mathbf{\rho} \tilde{\mathbf{\rho}}^* \nabla(\mathbf{\rho} - \mathbf{\rho}^*)]$$
+where $\bf{\rho}^*$ is the keyframe smoke density and $\tilde \bf{\rho}^*$ is the keyframe smoke density blurred to better match the diffusive quality of the simulated smoke.
+
+The smoke simulation is subject to significant numerical dissipation.  To eliminate this undesirable affect, we impose a simple normalization condition to maintain the density sum equal to the sum of keyframe density.  Specifically,  we require that the total mass of smoke  in the scene is equal to the total mass of smoke density in the keyframe.  If not, we scale our original density until the target density mass is met:
+	$$\rho_{ij} = \rho_{ij}  +  \alpha \sum (\rho_{ij}^* - \rho_{ij} ) $$
+In practice we use the modified normailization expression :
+	$$\rho_{ij} = \rho_{ij}  + \alpha  (\rho_{ij}^* - \rho_{ij}  )$$
+which actively destroys smoke density not matching the key frame.  We find that this destructive feature actually nicely balances the  effects of numerical diffusion. 
+
+For simplicity, our simulation runs on a regular old-fashioned $N\times N$ lattice.  To improve numerical accuracy, we employ a sudo-MAC grid approach to calculate derivatives at cell boundaries as need.  That is, we compute derivatives that we would usually associate with the secondary grid of the MAC grid.  
+
 
 \subsection{Rigid Body Coupling}
 We applied the idea presented in \cite{carlson2004} to update the velocity for the rigid body. According to equation (17) in the paper, the forces that arises from the relative density can be expressed as 
@@ -116,12 +140,15 @@ To improve the performance of the fluid solver, we implemented the Pre-condition
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Polarized Shape Rigid Body}
+\subsection{Rigid Body}
 To make our rigid body look more interesting, we implemented this polar parameterization shape. Given a function whose radius depends on angle, we can generate some different shapes. 
 
 Poler coordinates is convenient to find volume, moment of inertia and the coefficient $\mathit{w}$.
 
-\section{Goal}
+\section{Experiment and Results}
+
+In the preliminary stages of this ambitious project, we will only consider elliptic seed shapes dropped in incompressible 2D fluid.   Technically, we are able to simulat Some basic results from our simulations will be discussed subsequently.
+
 
 
 \section{Conclusion}

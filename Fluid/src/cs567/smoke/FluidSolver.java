@@ -271,17 +271,17 @@ public class FluidSolver
 			addSource(v, vOld);
 			add(fx,uOld);
 			add(fy,vOld);
-
+			
+			// DAMP MOMENTUM:
+			for(int ij=0; ij<size; ij++) {
+				u[ij] -= Constants.V_d * dt * u[ij];
+				v[ij] -= Constants.V_d * dt * v[ij] ;
+				fx[ij] -= Constants.V_d * u[ij];
+				fy[ij] -= Constants.V_d * v[ij]  ;
+			}
 		}
 		
 		
-		// DAMP MOMENTUM:
-		for(int ij=0; ij<size; ij++) {
-			u[ij] -= Constants.V_d * dt * u[ij];
-			v[ij] -= Constants.V_d * dt * v[ij] ;
-			fx[ij] -= Constants.V_d * u[ij];
-			fy[ij] -= Constants.V_d * v[ij]  ;
-		}
 		
 		// add in vorticity confinement force
 		vorticityConfinement(uOld, vOld);
@@ -364,11 +364,15 @@ public class FluidSolver
 			rb.v.set(0.0,0.0);
 			rb.omega = 0;
 			
-			//float mass =0 ;
-			//float momentOfInertia = 0;
-			for (int i = 1; i <= n; i++)
+			//Get computational domain
+			int iMin = (int) Math.floor(Math.max( rb.x.x - rb.maxRadius - 2, 1 ));
+			int iMax = (int) Math.ceil(Math.min( rb.x.x + rb.maxRadius + 2, n ));
+			int jMin = (int) Math.floor(Math.max( rb.x.y - rb.maxRadius - 2, 1 ));
+			int jMax = (int) Math.ceil(Math.min( rb.x.y + rb.maxRadius + 2, n ));
+			
+			for (int i = iMin; i <= iMax; i++)
 			{
-				for (int j = 1; j <= n; j++)
+				for (int j = jMin; j <= jMax; j++)
 				{
 					double w = rb.wRatio(i, j);
 					if (w > 0){
@@ -409,9 +413,9 @@ public class FluidSolver
 			rb.v.scale(rb.getInverseMass());
 			rb.omega *= rb.getInverseMomentOfInertia();
 			
-			for (int i = 1; i <= n; i++)
+			for (int i = iMin; i <= iMax; i++)
 			{
-				for (int j = 1; j <= n; j++)
+				for (int j = jMin; j <= jMax; j++)
 				{
 					double w = rb.wRatio(i, j);
 					if (w > 0){
@@ -561,10 +565,8 @@ public class FluidSolver
 	private void diffuse(int b, float[] c, float[] c0, float diff)
 	{
 		float a = dt * diff * n * n;
-		//scale(c0,c0, );
-		
 		linearSolver(b, c, c0, a, 1 + 4 * a);
-		//PCGSolver( b, c, c0, temp1 ,temp2, temp3, Constants.PCG_TOLERENCE );
+		//PCGSolver( b, c, c0, temp1 ,temp2, temp3, Constants.PCG_TOLERENCE ); //Not working
 
 	}
 
@@ -594,7 +596,7 @@ public class FluidSolver
 		{
 			for (int j = 1; j <= n; j++)
 			{
-				div[I(i, j)] = (x[I(i+1, j)] - x[I(i-1, j)] + y[I(i, j+1)] - y[I(i, j-1)]) *  0.5f / n;
+				div[I(i, j)] = - (x[I(i+1, j)] - x[I(i-1, j)] + y[I(i, j+1)] - y[I(i, j-1)]) *  0.5f / n;
 				p[I(i, j)] = 0;
 			}
 		}
@@ -603,9 +605,9 @@ public class FluidSolver
 		setBoundary(0, p);
 
 		//THIS SOLVER WONT WORK RIGHT NOW.  NEED TO ADD A MINUS SIGN TO DIV ABOVE.
-		//linearSolver(0, p, div, 1, 4);
+		linearSolver(0, p, div, 1, 4);
 		
-		PCGSolver(0, p, div, temp1, temp2, temp3, Constants.PCG_TOLERENCE);
+		//PCGSolver(0, p, div, temp1, temp2, temp3, Constants.PCG_TOLERENCE);
 
 		for (int i = 1; i <= n; i++)
 		{
@@ -661,7 +663,7 @@ public class FluidSolver
      *        Lap  x   x0
 	 * 
 	 * @param b Boundary condition flag 
-	 * @param x Solve for this
+	 * @param x Solve for this.  With out loss of generality, we set x = 0 at start
 	 * @param x0 The right hand side of Ax = alpha b
 	 * @param r Common storaage for residual vector
 	 * @param p Common storage for orthogonal vector
@@ -683,22 +685,24 @@ public class FluidSolver
 		{
 			for (int j = 1; j <= n; j++)
 			{	
-				r[I(i,j)] = x0[I(i, j)];  //Assume x = 0
+				x[I(i,j)] = 0f;
+				r[I(i,j)] = x0[I(i, j)];  
 				z[I(i,j)] = Minv * r[I(i,j)] ;
 				p[I(i,j)] = z[I(i,j)];
 			}
 		}
 		
-		resSq = dotProd(r,r);
+		//resSq = dotProd(r,r);
 		rhoOld = dotProd(z, r)  ;
 		
 		// Start iterating
 		for (int k = 0; k < nIterations; k++){
 						
 			//Break if residual is small 
-			if ( resSq < tolerence ){
-				System.out.println("TOLERENCE MET AFTER " + k + " STEPS");
-				return;
+			if ( rhoOld < tolerence ){
+				if (dotProd(r,r)<tolerence){
+					return;
+				}
 			}	
 			
 			//Mult p by A
@@ -720,7 +724,7 @@ public class FluidSolver
 			}
 			
 			//Compute new residual
-			resSq = dotProd(r,r);
+			//resSq = dotProd(r,r);
 			rhoNew = dotProd(z,r);
 
 			// Compute new conjugate  vector
@@ -739,7 +743,6 @@ public class FluidSolver
 			setBoundary(b, x);
 
 		}
-		System.out.println("SOLVER FINISHED WITHOUT CONVERGENCE. RESIDUAL = " + rhoOld);
 	}
 
 	/**
@@ -799,11 +802,11 @@ public class FluidSolver
 			x[i] += a * x0[i];
 	}
 
-	/** x +=  a * x0 */
-	private void scale(float[] x, float[] x0, float a)
+	/** x =  a * x0 */
+	private void scale(float[] x, float a)
 	{
 		for (int i=0; i<size; i++)
-			x[i] = a * x0[i];
+			x[i] *= a ;
 	}
 
 	
@@ -839,9 +842,15 @@ public class FluidSolver
 	public void addRigidBodies(ArrayList<RigidBody> rbs) {
 		RB = rbs;
 	}
+	
+	public void addRigidBody(RigidBody rb) {
+		RB.add(rb);
+	}
 
 	public void setNumerofFrame(int n_STEPS_PER_FRAME) {
 		// TODO Auto-generated method stub
 		this.n_STEPS_PER_FRAME = n_STEPS_PER_FRAME;
 	}
+
+
 }

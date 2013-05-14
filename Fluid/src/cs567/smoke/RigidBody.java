@@ -46,6 +46,9 @@ public class RigidBody
 	/** Volume */
 	double volume;
 	
+	/** Maximum radius. */
+	double maxRadius;
+	
 	/** MomentOfInertia */
 	double momentOfInertia;
 	
@@ -103,13 +106,14 @@ public class RigidBody
 	 * transforms.   */
 	public void updatePosition(double dt)
 	{
-
+		
 		/// UPDATE LINEAR POSITION:
 		Utils.acc(x, dt, v);
 
 		/// UPDATE ANGULAR POSITION:
 		theta += dt * omega;
-
+		
+		
 		/// RESET FORCE/TORQUE ACCUMULATORS:
 		force.x = force.y = torque = 0;
 		

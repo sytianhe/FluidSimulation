@@ -20,8 +20,9 @@ public class RigidEllipse extends RigidBody
 		super(centerOfMass, LinVel,theta, AngVel, d);
 		majorRadius = r1;
 		minorRadius = r2;
+		maxRadius = r1;
 		mass = Math.PI*r1*r2*d;
-		momentOfInertia = mass * r1 * r2 / 2;
+		momentOfInertia = mass * r1 * r2 / 2; // not correct
 	}
 	
 	/** Get the radius (relative to the center) of the ellipse at current angle */
