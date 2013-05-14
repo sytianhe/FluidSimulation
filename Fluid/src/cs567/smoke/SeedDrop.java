@@ -42,10 +42,10 @@ public class SeedDrop implements GLEventListener
 	float time;
 	
 	/** Number of shapes to sample. Sampled uniformly or at random?*/
-	int N_SHAPES = 40;
+	int N_SHAPES = 50;
 		
 	/** Number of drops per shape. Sampled uniformly or at random?*/ 
-	int N_SAMPLES_PER_SHAPE = 10;
+	int N_SAMPLES_PER_SHAPE = 20;
 	
 	/** Count the number of shapes so far. */
 	int shapeCounter = 0;
@@ -250,9 +250,8 @@ public class SeedDrop implements GLEventListener
 			
 			// TODO : SAVE AND EXIT 
 			
-			long   timeNS   = -System.nanoTime();
+			long   timeNS   = -System.currentTimeMillis();  
 			String filename = "data/seeddrop"+timeNS + ".txt";/// BUG: DIRECTORY MUST EXIST!
-
 			
 			try {
 				writer = new FileWriter(filename);

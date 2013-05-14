@@ -39,10 +39,9 @@ Wind dispersal of  seeds is an important mechanism of mobility in many plant spe
 
 \keywordlist
 
-\copyrightspace
 
 \section{Biological Overview }
-(Note: This biological overview is an abridged  version of that described in our original project proposal. )
+(Note: This biological overview is adapted from the one given in our original project proposal, and is included only for completeness. )
 \\ 
 \\
 Dispersion is the process by which an organism moves away from its place of birth.  This process is central to understanding  population structure and dynamics, gene-flow, evolution and speciation, as well as many other biological phenomena \cite{levin1989}.   In general, the mechanism for dispersion is difficult to model precisely. An organism may be mobile for its entire life, and its motions may be dictated by complicated behavior and interactions with other species.  For sessile organisms, the dispersal process is often restricted to a single phase in the organism's life in which the organism is essentially passive \cite{nathan2000}.   Such organisms lend themselves to more precise understanding of the dispersal process.  
@@ -55,46 +54,51 @@ This research together  describes a closed cycle in a biological story: seed mor
 
 Understanding how phenotypic changes to seed shape affect  flight characteristics remain a difficult but important challenge to the field, providing a link between phenotypic variation and dispersive outcome.  Some success has been achieved by construction low-dimensional flight models based on classical aerodynamic theory \cite{greene2005}.  However, careful physical modeling and simulation reveals that natural structures exhibit behavior that is not accurately described by aerodynamic theory, and instead depends on a full consideration of fluid and rigid-body coupling \cite{wang2005}\cite{wang2012}.   Given the tremendous increase in computing power and speed,  precise physical simulation is a viable approach to the problem.
 
-One of the most interesting features of simulation based approach to understanding flight characteristics is that it allows us to consider seed shapes not observed in nature.  This flexibility allows us to consider a number of problems that would be otherwise difficult to approach.  For instance, by looking at flight characteristics of seed shapes similar to those observed in nature, we can asses local stability and optimality of reel seeds.
+One of the most interesting features of a simulation based approach to understanding seed dispersion is that it allows us to consider seed shapes not observed in nature.  This freedom allows us to consider a number of problems that would  otherwise be  difficult to approach.  For instance, by looking at flight characteristics of seed shapes similar to those observed in nature, we can asses local stability and optimality of reel seeds.
 
-Further, we may sample the space of all possible seed morphologies to generate a complete map of flight characteristics.  In this way, we can generate a complete fitness landscape of seed morphology.\footnote{Here the fitness landscape for wind dispersed seeds is measured not only by how far a seed travels, but also by how often a seed falls in a habitable zone.  The distance plays an important role in the long term survival of the species, but the later is necessary for successful germination.}   While such a perspective is out of reach for most biological phenomena, the distinctly physical nature of wind based seed dispersion provides a unique glimpse into the diverse space of possible morphologies and the evolutionary pathways that connect them.  
+Further, we may sample the space of all possible seed morphologies to generate a complete map of flight characteristics.  In this way, we can generate a complete fitness landscape of seed morphology.\footnote{In reality, the fitness landscape for wind dispersed seeds is measured not only by how far a seed travels, but also by how often a seed falls in a habitable zone.  The distance plays an important role in the long term survival of the species, but the later is necessary for successful germination.}   While such a perspective is out of reach for most biological phenomena, the distinctly physical nature of wind based seed dispersion provides a unique glimpse into the diverse space of possible morphologies and the evolutionary pathways that connect them.   
+
+Given this project's relative infancy, we do not consider the research agenda described above in all it's glory, but instead focus instead on the simplified case of 2D dispersion of elliptic shapes.  Even in this simplified version of the problem, we observe subtle variations in shape and behavior, in support of the   This experiment and preliminary results are discussed in section 3.  
+
 
 
 \section{Technical Description}
 
 \subsection{Fluid (Smoke)}
-Our fluid simulation implementation is based on the source code provided for smoke simulation and control. Though not entirely relevant to our  goal of simulating seed dispersion, we began by implementing various features of the smoke control project.  Followed the  \cite{fattal2004}, we included a gathering force $G$ to make the smoke converged to keyframe density:
+Our fluid simulation implementation is based on the source code provided for smoke simulation and control. Though not entirely relevant to our  goal of modeling seed dispersion, we began by implementing various features of the smoke control project.  Following  \cite{fattal2004}, we introduce a gathering force $G$ to make the smoke converged to a given keyframe density:
 $$ \mathbf{G}(\mathbf{\rho}, \mathbf{\rho}^*)  = \nabla \cdot [\mathbf{\rho} \tilde{\mathbf{\rho}}^* \nabla(\mathbf{\rho} - \mathbf{\rho}^*)]$$
 where $\bf{\rho}^*$ is the keyframe smoke density and $\tilde \bf{\rho}^*$ is the keyframe smoke density blurred to better match the diffusive quality of the simulated smoke.
 
 The smoke simulation is subject to significant numerical dissipation.  To eliminate this undesirable affect, we impose a simple normalization condition to maintain the density sum equal to the sum of keyframe density.  Specifically,  we require that the total mass of smoke  in the scene is equal to the total mass of smoke density in the keyframe.  If not, we scale our original density until the target density mass is met:
-	$$\rho_{ij} = \rho_{ij}  +  \alpha \sum (\rho_{ij}^* - \rho_{ij} ) $$
-In practice we use the modified normailization expression :
+	$$\rho_{ij} = \rho_{ij} [ 1 +  \alpha \sum (\rho_{ij}^* - \rho_{ij} ) / N^2] \text{ where } \alpha \in [0,1] $$
+In practice we use the modified normalization expression :
 	$$\rho_{ij} = \rho_{ij}  + \alpha  (\rho_{ij}^* - \rho_{ij}  )$$
-which actively destroys smoke density not matching the key frame.  We find that this destructive feature actually nicely balances the  effects of numerical diffusion. 
+which actively destroys smoke density not matching the key frame.  We find that this destructive feature to nicely manage the spatial numerical dissipation. 
 
-For simplicity, our simulation runs on a regular old-fashioned $N\times N$ lattice.  To improve numerical accuracy, we employ a sudo-MAC grid approach to calculate derivatives at cell boundaries as need.  That is, we compute derivatives that we would usually associate with the secondary grid of the MAC grid.  
+For simplicity, our simulation runs on a good old-fashioned $N\times N$ lattice.  To improve numerical accuracy, we employ a sudo-MAC grid approach to calculate derivatives at cell boundaries (rather than across neighboring lattice points) as need.  That is, we compute derivatives that we would usually associate with the secondary grid of the MAC grid.  
 
 
 \subsection{Rigid Body Coupling}
-We applied the idea presented in \cite{carlson2004} to update the velocity for the rigid body. According to equation (17) in the paper, the forces that arises from the relative density can be expressed as 
+We implement rigid body coupling to our fluid simulation using the rigid fluid method described in \cite{carlson2004}. In this approach, each rigid body is treated as a fluid with body specific density.  After the fluid equations are solved, the updated fluid is used to determine the update to the rigid-body, and finally rigidity condition is imposed on the fluid  from the rigid body.
+
+According to equation (17) in the paper, the forces that arises from the relative density of the  can be expressed as 
 $$ \mathbf{S} = \rho_r \mathbf{A}_c + \mathbf{r}_i \times \rho_r \alpha_c - (\rho_r - \rho_f) [\frac{\mathbf{u}^* - \mathbf{u}^n}{\Delta t} + (\mathbf{u}^* \cdot \nabla )\mathbf{u}^* - \mathbf{f}]$$
-We decide to not add the collision forces into our system for this project, so our $\mathbf{S}$ term becomes
+Since we are only interested in isolated rigid bodies, we do not consider rigid-body rigid-body collisions  in our system. Then $\mathbf{S}$  becomes
 $$ \mathbf{S}' = - (\rho_r - \rho_f) [\frac{\mathbf{u}^* - \mathbf{u}^n}{\Delta t} + (\mathbf{u}^* \cdot \nabla )\mathbf{u}^* - \mathbf{f}]$$
-where $\mathbf{u}^*$ is the velocity of the current iteration of fluid solving. $\mathbf{u}^n$ is the velocity of last iteration. $\rho_r$ is the density of the rigid body, $\rho_f$ is the density of the fluid. $\mathbf{f}$ is the external force.
+where $\mathbf{u}^*$ is the velocity of the fluid  after solving the fluid equations  at the current time step but before considering rigid body coupling. $\mathbf{u}^n$ is the velocity from the previou iteration. $\rho_r$ is the density of the rigid body, $\rho_f$ is the density of the fluid. $\mathbf{f}$ represents any external forces on the system.
 
-In order to compute the term $(\mathbf{u}^* \cdot \nabla )\mathbf{u}^*$, assume $\mathbf{u}^* = \binom{u}{v}$, then
-\begin{equation}
-\begin{split}
-(\mathbf{u}^* \cdot \nabla )\mathbf{u}^*& = (u \partial_u + v \partial_v)\mathbf{u}^* \\
-& = \binom {u \partial_u u + v \partial_v u}{ u \partial_u v+ v \partial_v v}
-\end{split}
-\end{equation}
-Then we applied the MAC grid to calculate $\partial_u u, \partial_u v, \partial_v u \mbox{ and } \partial_v v$.
+%In order to compute the term $(\mathbf{u}^* \cdot \nabla )\mathbf{u}^*$, assume $\mathbf{u}^* = \binom{u}{v}$, then
+%\begin{equation}
+%\begin{split}
+%(\mathbf{u}^* \cdot \nabla )\mathbf{u}^*& = (u \partial_u + v \partial_v)\mathbf{u}^* \\
+%& = \binom {u \partial_u u + v \partial_v u}{ u \partial_u v+ v \partial_v v}
+%\end{split}
+%\end{equation}
+%Then we applied the MAC grid to calculate $\partial_u u, \partial_u v, \partial_v u \mbox{ and } \partial_v v$.
 
-Using $\mathbf{S}$ we update $\mathbf{u}^*$ for a new velocity field,
+Using $\mathbf{S}$ we update a  new velocity field that incorporates rigid body behavior,
 $$\hat{\mathbf{u}} = \mathbf{u}^* + \mathit{w}\frac{\Delta t}{\rho_r}\mathbf{S}$$
-where $\mathit{w}$ is the fraction of the cell that is part of solid. To obtain this $\mathit{w}$, we used the supersampling technique. 
+where $\mathit{w}$ is the fraction of the cell that is part of the rigid body. To obtain this $\mathit{w}$ at the boundary of our rigid body , we used the supersampling technique. 
 
 In order to maintain the rigidity, we need to obtain $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ for each rigid body. We calculate them by integrating $\hat{\mathbf{u}}$ inside a given rigid body $\mathbb{R}_i$ with the following equations:
 $$ M_i \hat{\mathbf{v}}_i = \int_{\mathbb{R}_i} \rho_i \hat{\mathbf{u}} dg_i$$
@@ -108,12 +112,13 @@ $$\mathbf{u}^{n+1} = (1-\mathit{w})\hat{\mathbf{u}} + \mathit{w}\hat{\mathbf{u}}
 In our implementation, we go through each cell in the grid two times. The first time, we find out $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ by cumulating $\rho_i \hat{\mathbf{u}} dg_i$ and $\mathbf{r}_i \times \rho_i \hat{\mathbf{u}} dg_i$ at each cell. The second time, we use the calculated $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ to compute $ \hat{\mathbf{u}}_R $ and to update the new velocity $\mathbf{u}^{n+1}$ .
 
 \subsection{Stable Solver}
-To improve the performance of the fluid solver, we implemented the Pre-conditioner Conjugate Gradient (PCG) solver. The pseudo code is showed in algorithm $\ref{alg1}$.
+The provided base code comes complete with To improve the performance of the fluid solver, we implemented the Preconditioned Conjugate Gradient (PCG) solver. Pseudo code is given in $\ref{alg1}$.  In the interest of time we use the simplest of preconditioners:  $Q = \text{diag}(M)$, leading to marginal improvements.  Preconditioning with something like the Incomplete Cholesky factorization of A would be preferable.
+
 \begin{algorithm}
 \caption{Preconditioned Conjugate gradient algorithm }
 \label{alg1}
 \begin{algorithmic}
-\STATE \textbf{input} $x$, $A$, $b$, $M$, $Q$, $\delta$, $\varepsilon$
+\STATE \textbf{input} $x$, $A$, $b$, $Q$, $\delta$, $\varepsilon$
 \STATE $r\leftarrow b - Ax$
 \STATE solve $Qz = r$ for $z$
 \STATE $v \leftarrow z$
@@ -141,9 +146,7 @@ To improve the performance of the fluid solver, we implemented the Pre-condition
 \end{algorithm}
 
 \subsection{Rigid Body}
-To make our rigid body look more interesting, we implemented this polar parameterization shape. Given a function whose radius depends on angle, we can generate some different shapes. 
-
-Poler coordinates is convenient to find volume, moment of inertia and the coefficient $\mathit{w}$.
+We would ultimately like to be able to generate arbitrary rigid shapes in drop them in our fluid simulation to see how they fall.  To that end, we provide general support for all shapes parametrized by a function $r(\theta)$ via the \textbf{RigidPolarShape} class. Assuming that \textbf{radialFunction(theta)} is specified, this class computes basic physical quantities such as total mass, moment of inertia, etc by direct numerical integration.  This class also handles percent cell inclusion computations  ($w$from Section 2.2)
 
 \section{Experiment and Results}
 
