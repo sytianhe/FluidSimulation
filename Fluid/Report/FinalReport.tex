@@ -27,7 +27,7 @@
 
 \pdfauthor{Michael Flashman, Tianhe Zhang}
 
-\keywords{simulation, fluids,  rigid body, plant seeds, dispersion}
+\keywords{simulation, rigid fluid, plant seeds, wind dispersion}
 
 \begin{document}
 
@@ -70,9 +70,9 @@ $$ \mathbf{G}(\mathbf{\rho}, \mathbf{\rho}^*)  = \nabla \cdot [\mathbf{\rho} \ti
 where $\bf{\rho}^*$ is the keyframe smoke density and $\tilde \bf{\rho}^*$ is the keyframe smoke density blurred to better match the diffusive quality of the simulated smoke.
 
 The smoke simulation is subject to significant numerical dissipation.  To eliminate this undesirable affect, we impose a simple normalization condition to maintain the density sum equal to the sum of keyframe density.  Specifically,  we require that the total mass of smoke  in the scene is equal to the total mass of smoke density in the keyframe.  If not, we scale our original density until the target density mass is met:
-	$$\rho_{ij} = \rho_{ij} [ 1 +  \alpha \sum (\rho_{ij}^* - \rho_{ij} ) / N^2] \text{ where } \alpha \in [0,1] $$
+	$$\rho_{ij} = \rho_{ij}\left [ 1 +  \alpha \sum (\rho_{ij}^* - \rho_{ij} ) / N^2 \right] \text{ with } \alpha \in [0,1] $$
 In practice we use the modified normalization expression :
-	$$\rho_{ij} = \rho_{ij}  + \alpha  (\rho_{ij}^* - \rho_{ij}  )$$
+	$$\rho_{ij} = \rho_{ij}\left[ 1  + \alpha  (\rho_{ij}^* - \rho_{ij} ) \right ] \text{ with } \alpha \in [0,1] $$
 which actively destroys smoke density not matching the key frame.  We find that this destructive feature to nicely manage the spatial numerical dissipation. 
 
 For simplicity, our simulation runs on a good old-fashioned $N\times N$ lattice.  To improve numerical accuracy, we employ a sudo-MAC grid approach to calculate derivatives at cell boundaries (rather than across neighboring lattice points) as need.  That is, we compute derivatives that we would usually associate with the secondary grid of the MAC grid.  
@@ -85,7 +85,7 @@ According to equation (17) in the paper, the forces that arises from the relativ
 $$ \mathbf{S} = \rho_r \mathbf{A}_c + \mathbf{r}_i \times \rho_r \alpha_c - (\rho_r - \rho_f) [\frac{\mathbf{u}^* - \mathbf{u}^n}{\Delta t} + (\mathbf{u}^* \cdot \nabla )\mathbf{u}^* - \mathbf{f}]$$
 Since we are only interested in isolated rigid bodies, we do not consider rigid-body rigid-body collisions  in our system. Then $\mathbf{S}$  becomes
 $$ \mathbf{S}' = - (\rho_r - \rho_f) [\frac{\mathbf{u}^* - \mathbf{u}^n}{\Delta t} + (\mathbf{u}^* \cdot \nabla )\mathbf{u}^* - \mathbf{f}]$$
-where $\mathbf{u}^*$ is the velocity of the fluid  after solving the fluid equations  at the current time step but before considering rigid body coupling. $\mathbf{u}^n$ is the velocity from the previou iteration. $\rho_r$ is the density of the rigid body, $\rho_f$ is the density of the fluid. $\mathbf{f}$ represents any external forces on the system.
+where $\mathbf{u}^*$ is the velocity of the fluid  after solving the fluid equations  at the current time step but before considering rigid body coupling. $\mathbf{u}^n$ is the velocity from the previous iteration. $\rho_r$ is the density of the rigid body, $\rho_f$ is the density of the fluid, and $\mathbf{f}$ represents any external forces on the system.
 
 %In order to compute the term $(\mathbf{u}^* \cdot \nabla )\mathbf{u}^*$, assume $\mathbf{u}^* = \binom{u}{v}$, then
 %\begin{equation}
@@ -112,7 +112,7 @@ $$\mathbf{u}^{n+1} = (1-\mathit{w})\hat{\mathbf{u}} + \mathit{w}\hat{\mathbf{u}}
 In our implementation, we go through each cell in the grid two times. The first time, we find out $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ by cumulating $\rho_i \hat{\mathbf{u}} dg_i$ and $\mathbf{r}_i \times \rho_i \hat{\mathbf{u}} dg_i$ at each cell. The second time, we use the calculated $\hat{\mathbf{v}}_i$ and $\hat{\omega}_i$ to compute $ \hat{\mathbf{u}}_R $ and to update the new velocity $\mathbf{u}^{n+1}$ .
 
 \subsection{Stable Solver}
-The provided base code comes complete with To improve the performance of the fluid solver, we implemented the Preconditioned Conjugate Gradient (PCG) solver. Pseudo code is given in $\ref{alg1}$.  In the interest of time we use the simplest of preconditioners:  $Q = \text{diag}(M)$, leading to marginal improvements.  Preconditioning with something like the Incomplete Cholesky factorization of A would be preferable.
+The provided base code comes complete with a simple Gauss-Seidel iterative linear solver. To improve the performance of the fluid solver, we implemented the Preconditioned Conjugate Gradient (PCG) linear solver. Pseudo code for this method is provide in Algorithm~$\ref{alg1}$ \cite{kincaid2002}.  In the interest of time we use the simplest  pre--conditioner:  $Q = \text{diag}(M)$.  At present, this pre--conditioner yields  marginal improvements over the provided .  Preconditioning with something like the Incomplete Cholesky factorization of A would be preferable.  
 
 \begin{algorithm}
 \caption{Preconditioned Conjugate gradient algorithm }
@@ -145,17 +145,38 @@ The provided base code comes complete with To improve the performance of the flu
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Rigid Body}
-We would ultimately like to be able to generate arbitrary rigid shapes in drop them in our fluid simulation to see how they fall.  To that end, we provide general support for all shapes parametrized by a function $r(\theta)$ via the \textbf{RigidPolarShape} class. Assuming that \textbf{radialFunction(theta)} is specified, this class computes basic physical quantities such as total mass, moment of inertia, etc by direct numerical integration.  This class also handles percent cell inclusion computations  ($w$from Section 2.2)
+\subsection{Rigid Bodies}
+Toward the support of arbitrary seed dynamics simulation, we provide general support for  shapes parametrizable by a radial function $r(\theta)$.   The implementation is provided in the \textbf{RigidPolarShape} class. Assuming that \textbf{radialFunction(theta)} is specified in a child class, this class computes basic physical quantities such as total mass, moment of inertia, etc by direct numerical integration.  This class also handles percent cell inclusion computations  ( $w$from Section 2.2). 
 
+Arbitrary shape support is hard, so we are in one sense settling.  At the same time, the space of shapes parametrized by radial function is actually quite general.  In addition it comes with a natural set of basis functions.  By selecting a particular set of principle basis functions, we are well suited to sample the shape space in a principled way.     
+
+
+\pagebreak
 \section{Experiment and Results}
+We perform a 2D version of the experiment described at the end of Section 1 using the fluid with rigid body simulation framework described in Section 2.  For this preliminary round of experiments, we focus in particular on elliptic seed shapes which are easily parametrized by a major--axis and a minor--axis.    The experiment is outlined below:
+\begin{enumerate}
+\item  Generate a new seed shape by  choosing random major and minor axis.
+\item  Drop the shape several times at different orientations.  We opt to step through a finite number of specific orientation, but random sampling could be performed as well.
+\item Measure: average velocity, terminal velocity, average horizontal displacement , max  horizontal displacement, final position, etc.  
+\item Continue...
+\end{enumerate}  
+See the  main program \textbf{Seed Drop} for implementation details, or to try it out for yourself.    
 
-In the preliminary stages of this ambitious project, we will only consider elliptic seed shapes dropped in incompressible 2D fluid.   Technically, we are able to simulat Some basic results from our simulations will be discussed subsequently.
+For our principle experimental run, we simulated forty different shapes and for each shape performed ten drops.   
+Some date from preliminary trials is given in the Data directory.   Movies for a few of these trials can be found in the Artifacts Directory.  
 
+We will not stress the precise numerical details of the simulation (as they really are just preliminary).  But it is worth observing that the various trials demonstrates two principle modes of behavior: fluttering and tumbling.    In two dimensions, these are the only modes of falling. Which mode a given shape lies in has dramatic  implications on 
+
+
+Perhaps the most interesting thing about 
+
+
+For lack of time, we will only provide a cursory analysis of the data obtained.  (But perhaps we will have more to say on Thursday).      
 
 
 \section{Conclusion}
-We have described a simulation based approach  for quantifying the aerodynamics of random 2D shapes.  Applied to plant seeds, this approach provides for an (approximate) global understanding of the fitness landscape for seed morphology.  While we only present this project as a proof of concept, our approach has direct implications for the understanding of seed morphology, dispersal, population dynamics, and evolution.
+We have described a simulation based approach  for quantifying the aerodynamics of random 2D shapes.  In the context of plan seed dispersoin, this approach provides for an (approximate) global understanding of the fitness landscape for seed morphology.  While we only present preliminary results as  proof of concept, it is our ho[e that  extensions of this  approach will provide new understanding of seed morphology, dispersal, population dynamics, and evolution.
+
 \nocite{*}
 \bibliographystyle{acmsiggraph}
 \bibliography{bibliography}
