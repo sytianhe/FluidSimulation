@@ -154,6 +154,13 @@ Arbitrary shape support is hard, so we are in one sense settling.  At the same t
 \subsection{Colorful Smoke}   
 To make our smoke look interesting, we also implemented a colorful smoke. The idea is that instead of just solve the grayscale density, we run the solver three times to solve the RGB densities separately. In order to do that, we changed the \textbf{SmokeKeyframe} function so that it retrieves the RGB data from the target figure. 
 
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=240pt]{fish.png}
+\caption{First three photos are take during color smoke animation. The fourth one is the target image. }
+\end{center}
+\end{figure}
+
 \pagebreak
 \section{Experiment and Results}
 We perform a 2D version of the experiment described at the end of Section 1 using the fluid with rigid body simulation framework described in Section 2.  For this preliminary round of experiments, we focus in particular on elliptic seed shapes which are easily parametrized by a major--axis and a minor--axis.    The experiment is outlined below:
@@ -171,7 +178,7 @@ where $a$ is the major axis and $b$ is the minor axis.  Some date from prelimina
 
 We will not stress the precise numerical details of the simulation. But it is worth observing that the various trials demonstrates two principle modes of behavior: fluttering and tumbling.    In two dimensions, these are the only modes of falling. And which mode a given shape lies in has dramatic  implications for the particular characteristics of the fall.  For instance, tumbling behavior supports significant horizontal displacement where as fluttering behavior tends to leave the falling shape roughly where it started.  More interesting is that the shapes which exhibit tumbling seem to lie in an intermediate range in the space of ellipses, with eccentricity on the order of 0.5.  
 
-Just for fun, we provide a few plots of our data in Fig~1 and Fig~2.  As hinted at above, both plots indicate a curious transition point in behavior near eccentricity of 0.5.  The first plot, indicates that  flutter/tumbling is maximal near this critical point. The second plot, depicts an abrupt drop in average velocity at this critical point.   
+Just for fun, we provide a few plots of our data in Fig~2 and Fig~3.  As hinted at above, both plots indicate a curious transition point in behavior near eccentricity of 0.5.  The first plot, indicates that  flutter/tumbling is maximal near this critical point. The second plot, depicts an abrupt drop in average velocity at this critical point.   
 
 \section{Conclusion}
 We have described a simulation based approach  for quantifying the aerodynamics of random 2D shapes.  In the context of plan seed dispersion, this approach provides for an (approximate) global understanding of the fitness landscape for seed morphology.  While we only present preliminary results as  proof of concept, they already  hint at a surprising landscape of behavior across shapes.  It is our hope that  extensions of this  approach will provide new understanding of seed morphology, dispersal, population dynamics, and evolution.
