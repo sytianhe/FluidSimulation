@@ -152,7 +152,7 @@ Toward the support of arbitrary seed dynamics simulation, we provide general sup
 Arbitrary shape support is hard, so we are in one sense settling.  At the same time, the space of shapes parametrized by radial function is actually quite general.  In addition it comes with a natural set of basis functions.  By selecting a particular set of principle basis functions, we are well suited to sample the shape space in a principled way.  
 
 \subsection{Colorful Smoke}   
-To make our smoke look interesting, we also implemented a colorful smoke. The idea is that instead of just solve the grayscale density, we run the solver three times to solve the RGB densities separately. In order to do that, we changed the \textbf{SmokeKeyframe} function so that it retrieves the RGB data from the target figure. 
+To make our smoke look interesting, we also implemented a colorful smoke (Fig 1). The idea is that instead of just solve the grayscale density, we run the solver three times to solve the RGB densities separately. In order to do that, we changed the \textbf{SmokeKeyframe} function so that it retrieves the RGB data from the target figure. 
 
 \begin{figure}[ht]
 \begin{center}
