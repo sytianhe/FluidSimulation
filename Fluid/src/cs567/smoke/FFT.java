@@ -1,5 +1,7 @@
 package cs567.smoke;
 
+/** NOT USED IN THE PROJECT (CURRENTLY)   .*/
+
  /*
   *  Copyright 2006-2007 Columbia University.
   *

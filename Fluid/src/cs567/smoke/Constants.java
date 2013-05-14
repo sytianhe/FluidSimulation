@@ -12,7 +12,7 @@ public class Constants
 {
     /** Time-step size. Note that explicitly integrated smoke-control
      * forcing/density terms can impose step-size restrictions. (default: 0.005)*/
-    public static final float dt = 0.005f;/// <-- MAY NEED TO REDUCE
+    public static final float dt = 0.01f;/// <-- MAY NEED TO REDUCE
 
     /** Resolution of N-by-N computational grid. */
     public static final int N = 100;
@@ -40,7 +40,7 @@ public class Constants
     public static final float V_f = 2f;
 
     /** Gathering rate amplitude, V_g (default: 0.0005)  */
-    public static final float V_g = 0.1f;
+    public static final float V_g = 0.05f;
 
     /** Drag force amplitude, V_d (default: 0.5)  */
     public static final float V_d = 0.5f;

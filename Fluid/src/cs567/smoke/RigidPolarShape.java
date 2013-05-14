@@ -81,13 +81,13 @@ public class RigidPolarShape extends RigidBody {
 		
 		sep.set(row + 0.5,  column + 0.5);
 		sep.sub(x);
-		this.transformW2B(sep);
+		transformW2B(sep);
 		double angle = Math.atan2(sep.y, sep.x);
 		double r = radialFunction(angle);
-		if (sep.length() <= r - 2){
+		if (sep.length() < r - 3){
 			return 1;
 		}
-		else if(sep.length() > r + 2){
+		else if(sep.length() > r + 3){
 			return 0;
 		}
 		else{

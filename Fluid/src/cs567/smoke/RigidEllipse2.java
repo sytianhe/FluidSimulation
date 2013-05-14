@@ -18,6 +18,7 @@ public class RigidEllipse2 extends RigidPolarShape {
 	
 	@Override
 	public double radialFunction(double theta){
+		theta = modAngle(theta);
 		return majorAxis * minorAxis / Math.sqrt( Math.pow(minorAxis * Math.cos(theta), 2.0) + Math.pow(majorAxis * Math.sin(theta), 2.0)   );
 	}
 	

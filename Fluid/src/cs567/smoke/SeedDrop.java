@@ -85,7 +85,7 @@ public class SeedDrop implements GLEventListener
 	RigidBody rb;
 	
 	/** Rigid body density. */
-	float density = 100f;
+	float density = 5f;
 	
 	/** Track terminal velocity of rb. */
 	double terminalVelocity;
@@ -187,6 +187,8 @@ public class SeedDrop implements GLEventListener
 				time = 0;
 				maxDisplacement = 0;
 				terminalVelocity = 0;
+				path.clear();
+
 			}
 			
 			//PERFORM FLUID SIMULATION 
@@ -294,13 +296,15 @@ public class SeedDrop implements GLEventListener
 		// DRAW 
 		////////////////////
 		{//DRAW PATH:
-			gl.glLineWidth((float) 1f); 
-			gl.glColor3d(0.0, 0.0, 1.0);
-			gl.glBegin(GL2.GL_LINES);
-			for(Point2d p : path){
-				gl.glVertex2d(p.x/Constants.N, p.y/Constants.N);
-			}			
-			gl.glEnd();
+			if (path.size()>1){
+				gl.glLineWidth((float) 1f); 
+				gl.glColor3d(0.0, 0.0, 1.0);
+				gl.glBegin(GL2.GL_LINES);
+				for(Point2d p : path){
+					gl.glVertex2d(p.x/Constants.N, p.y/Constants.N);
+				}			
+				gl.glEnd();
+			}
 		}
 		
 
@@ -320,11 +324,11 @@ public class SeedDrop implements GLEventListener
 					float y = (j + 0.5f)/(float)n;
 					Vector2f temp = new Vector2f(fs.u[Constants.I(i,j)], fs.v[Constants.I(i,j)]);
 					//System.out.println(temp);
-					temp.scale(0.1f);
+					temp.scale(10f);
 					gl.glVertex2f(x, y);
 					float u = temp.x;
 					float v = temp.y;
-					gl.glVertex2f(x+u, y+v);
+					gl.glVertex2f(x+u/n, y+v/n);
 
 				}
 				gl.glEnd();
@@ -362,7 +366,7 @@ public class SeedDrop implements GLEventListener
 	{
 		if(frame != null) return;
 
-		frame = new JFrame("SEED DROP!");
+		frame = new JFrame("SEED DROP!  HIT SPACE TO START");
 		GLCanvas canvas = new GLCanvas();
 		canvas.addGLEventListener(this);
 
@@ -454,7 +458,6 @@ public class SeedDrop implements GLEventListener
 				gl.glColor3f(0,0,0);
 			else 
 				gl.glColor3f(1,0,0);
-			gl.glVertex2d(0,0);	gl.glVertex2d(1,0);	gl.glVertex2d(1,1);	gl.glVertex2d(0,1);	gl.glVertex2d(0,0);
 			gl.glEnd();
 		}
 
@@ -480,16 +483,27 @@ public class SeedDrop implements GLEventListener
 	 */
 	public void dispatchKey(char key, KeyEvent e)
 	{
-		//System.out.println("CHAR="+key+", keyCode="+e.getKeyCode()+", e="+e);
 		if(key == ' ') {//SPACEBAR --> TOGGLE SIMULATE
 			simulate = !simulate;
 		}
-		else if (key == 'r') {//RESET
+		else if (key == 'r') {//RESET  USE ONLY IF YOU DONT CARE ABOUT THE FINAL DATA
 			System.out.println("RESET!");
-			simulate = false;
 			frameExporter = null;
 			fs.reset();
+			rb = null;
+			shapeCounter += 1;
+			path.clear();
 		}
+//		else if (key == 'd'){
+//			density += 1;
+//			if(rb != null) rb.density = density; 
+//			System.out.println("DENSITY CHANGED: " + density);
+//		}
+//		else if (key == 'D'){
+//			density -= 1;
+//			if(rb != null) rb.density = density; 
+//			System.out.println("DENSITY CHANGED: " + density);
+//		}
 		else if (key == 'v') {// velocity field display
 			veldisplay = !veldisplay;
 			if (veldisplay){
