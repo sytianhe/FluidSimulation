@@ -604,7 +604,7 @@ public class FluidSolver
 		setBoundary(0, div);
 		setBoundary(0, p);
 
-		//THIS SOLVER WONT WORK RIGHT NOW.  NEED TO ADD A MINUS SIGN TO DIV ABOVE.
+		//THE LIN SOLVER WONT WORK RIGHT NOW.  NEED TO ADD A MINUS SIGN TO DIV ABOVE.
 		//linearSolver(0, p, div, 1, 4);
 		
 		PCGSolver(0, p, div, temp1, temp2, temp3, Constants.PCG_TOLERENCE);
