@@ -39,7 +39,7 @@ public class SmokeKeyframe
 	 * @param imageFilename Image in question. Resized, resampled, and
 	 * converted to grayscale image.
 	 */
-	SmokeKeyframe(String imageFilename) throws IOException
+	SmokeKeyframe(String imageFilename, int RGB) throws IOException
 	{
 		this.imageFilename = imageFilename;
 
@@ -48,7 +48,9 @@ public class SmokeKeyframe
 		size = N*N;/// NUMBER OF PIXELS
 
 		/// LOAD & RESAMPLE IMAGE FOR DENSITY KEYFRAME (rhoGoal):
-		rhoGoal = loadKeyframeDensity(imageFilename);
+		//rhoGoal = loadKeyframeDensity(imageFilename);
+		rhoGoal = loadKeyframeDensityRGB(imageFilename, RGB);
+
 
 		/// BLUR rhoGoal:
 		rhoGoalBlur = new float[size];
@@ -131,6 +133,44 @@ public class SmokeKeyframe
 				density[Constants.I(i,j)] = gray;
 			}
 		}
+
+		return density;
+	}
+	
+	/** Loads and resamples image to required image resolution
+	 * specified by Constants. */
+	static float[] loadKeyframeDensityRGB(String imageFilename, int rgb) throws IOException
+	{
+		int N = Constants.N;
+		float[] density = new float[Constants.size];
+
+		/// LOAD IMAGE:
+		File file = new File(imageFilename);
+		if(!file.exists()) throw new FileNotFoundException("imageFilename="+imageFilename);
+		BufferedImage image = ImageIO.read(file);
+
+		/// RENDER TO KEYFRAME-RESOLUTION BufferedImage:
+		Image renderImage = Toolkit.getDefaultToolkit().createImage
+				(new FilteredImageSource(image.getSource(), new AreaAveragingScaleFilter(N,N))); 
+		BufferedImage keyframeImage = new BufferedImage(N,N,BufferedImage.TYPE_INT_RGB);//TYPE_BYTE_GRAY); //INT_RGB);
+		Graphics      gfx           = keyframeImage.getGraphics();
+		gfx.drawImage(renderImage,0,0,null);
+		gfx.dispose();
+		//ImageIO.write(keyframeImage, "png", new File(imageFilename+".keyframe.png"));
+
+		/// EXTRACT "density" DATA FROM keyframeImage:
+		Raster raster = keyframeImage.getData();
+		for(int i=0; i<N; i++) {
+			for(int j=0; j<N; j++) {
+				//int fi = (N-1) - i;
+				int fj = (N-1) - j;
+				float gray = raster.getSampleFloat(i, fj, rgb) / 255f;
+				density[Constants.I(i,j)] = gray;
+			}
+		}
+//		System.out.println("red: " + raster.getSampleFloat(N/2, N/3, 0));
+//		System.out.println("green: " + raster.getSampleFloat(N/2, N/3, 1));
+//		System.out.println("blue: " + raster.getSampleFloat(N/2, N/3, 2));
 
 		return density;
 	}
