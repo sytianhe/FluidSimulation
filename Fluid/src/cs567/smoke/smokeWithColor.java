@@ -445,13 +445,13 @@ public class smokeWithColor implements GLEventListener
 	private float getDrawDensityRGB(int i, int j, int rgb) { 
 		float d = 0;
 		if (rgb == 0){
-			d = 2*fsR.getDensity(i,j);///arbitrary scaling
+			d = fsR.getDensity(i,j);///arbitrary scaling
 		}
 		else if (rgb == 1){
-			d = 2*fsG.getDensity(i,j);///arbitrary scaling
+			d = fsG.getDensity(i,j);///arbitrary scaling
 		}
 		else if (rgb == 2){
-			d = 2*fsB.getDensity(i,j);///arbitrary scaling
+			d = fsB.getDensity(i,j);///arbitrary scaling
 		}
 		else{
 			System.out.println("Wrong index!!!");
@@ -677,7 +677,7 @@ public class smokeWithColor implements GLEventListener
 			System.out.println("Smoke! \nUSAGE: args[k] = k'th keyframe image filename");
 			String[] imageKeyframes = {
 					"images/Cornell-logo1.jpg",
-					"images/cornellLogo.png", 
+					"images/carp.jpg", 
 					"images/yinYang2.png",
 			};
 			if(args.length > 0)  imageKeyframes = args;
